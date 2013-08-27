@@ -25,7 +25,7 @@ io.sockets.on('connection', function (socket) {
 });
     
 function handler(req, res) { 
-		var data = "Connected !!";       
+		var data = "Hello Everyone Welcome to the HACK TIME FUN Project... !!";
         res.writeHead(200);
         res.end(data);
 }    
