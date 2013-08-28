@@ -1,0 +1,11 @@
+{
+  "name": "MineMen",
+  "description": "Fun Project",
+  "author": "AdPlayer <your@emailaddress.com>",
+  "version": "0.0.1",
+  "dependencies": {
+    "express": "3.x",
+    "socket.io": "0.9.x"
+  },
+  "engine": "node >= 0.6.6"
+}
