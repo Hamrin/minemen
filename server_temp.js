@@ -29,6 +29,14 @@ io.sockets.on('connection', function(socket){
   });
 });
 
+// assuming POST: name=foo&color=red
+server.post('/register', function(req, res) {
+    console.log('-- Register Bot: --');
+    console.log('Name: ' + req.body.name);
+    console.log('IP: ' + req.body.ip);
+    console.log('-------------------');
+    res.send('Bot registered!');
+});
 
 ///////////////////////////////////////////
 //              Routes                   //
@@ -37,7 +45,7 @@ io.sockets.on('connection', function(socket){
 /////// ADD ALL YOUR ROUTES HERE  /////////
 
 server.get('/', function(req,res){
-  res.sendFile(__dirname + '/index.html');
+  res.sendfile(__dirname + '/index.html');
 });
 
 
