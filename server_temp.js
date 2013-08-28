@@ -49,4 +49,66 @@ server.get('/', function(req,res){
 });
 
 
+///////////////////////////////////////////
+//             other stuff               //
+///////////////////////////////////////////
+
+/**
+ * to post messages to bots
+ * usage:
+ * postToBot("192.168.0.1",1337,"ping",{data:"cool data"});
+ * todo:timeout
+ */
+function postToBot(host, port, message, data) {
+    data = JSON.stringify(data);
+
+    var options = {
+        hostname: host,
+        port: port,
+        path: '/' + message,
+        method: 'POST'
+    };
+
+    var request = http.request(options, function(res) {
+        console.log('STATUS: ' + res.statusCode);
+        console.log('HEADERS: ' + JSON.stringify(res.headers));
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            console.log('BODY: ' + chunk);
+        });
+        res.on('end', function() {
+            // do what you do
+        });
+    });
+// listening to the response is optional, I suppose
+    var myTimeout = 1000;
+    request.on('socket', function (socket) {
+        socket.setTimeout(myTimeout);
+        socket.on('timeout', function() {
+            console.log('TIMEOUT:');
+            request.abort();
+        });
+    });
+
+    request.on('response', function(response) {
+        response.on('data', function(chunk) {
+            // do what you do
+        });
+        response.on('end', function() {
+            // do what you do
+        });
+    });
+
+    request.on('error', function(e) {
+        console.log('problem with request: ' + e.message);
+    });
+
+    // write data to request body
+    request.write(data);
+    request.end();
+}
+
+
+
+
 console.log('Listening on http://0.0.0.0:' + port );
