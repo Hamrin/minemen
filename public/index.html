@@ -1,1 +1,33 @@
-Hello!
+<html>
+<head>
+<script src="/js/vendor/socket.io.min.js"/>
+<script type="text/javascript">
+    window.onload = function() {
+        console.log("window on load");
+        var messages = [];
+        var socket = io.connect('http://localhost:8081');
+        var content = document.getElementById("content");
+
+        socket.on('server_message', function (data) {
+            if(data.message) {
+                messages.push(data.message);
+                var html = '';
+                for(var i=0; i<messages.length; i++) {
+                    html += messages[i] + '<br />';
+                }
+                content.innerHTML = html;
+            } else {
+                console.log("There is a problem:", data);
+            }
+        });
+
+    }
+</script>
+</head>
+<body>
+<div style="float:left; margin: 5px 5px 5px 5px; border: solid #CCC 1px; width: 300px; height: 300px; font-size: 8pt; vertical-align: middle; color: #777;" id="content">
+
+</div>
+
+</body>
+</html>
