@@ -18,6 +18,7 @@ for (var i = 0; i < 4; i++) {
             request.on('end', function () {
 
                 console.log("message received.");
+                console.log(request.url);
                 console.log(body);
 
                 var response = {};
@@ -64,10 +65,10 @@ for (var i = 0; i < 4; i++) {
                         console.log("===== server error: " + data.error);
                     }
                 }
+                res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.write(JSON.stringify(response));
+                res.end();
 
-//            res.writeHead(200, {'Content-Type': 'text/plain'});
-//            res.end('Bot says thank you.\n');
             });
         }
         else {

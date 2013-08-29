@@ -22,25 +22,37 @@ var gameSettings = {
     boardSize:{x:10, y:10},
     maxPlayers: 4
 };
+
+
+var viewConnected = false;
 var game = newGame();
 
-// register testBots
-for (var i = 0; i < game.settings.maxPlayers; i++) {
-    registerBot("127.0.0.1", 1337 + i, function(){
-        if (bots.length == game.settings.maxPlayers)
-        takeTurn();
-    });
-
-
-}
-
-//Setup Socket.IO
 io = io.listen(httpServer);
 io.sockets.on('connection', function(socket){
     console.log('Client Connected');
+
+
+    socket.emit('updateGame', game);
+
+    // register testBots
+    for (var i = 0; i < game.settings.maxPlayers; i++) {
+        registerBot("127.0.0.1", 1337 + i, function(){
+            console.log("register");
+            console.log(game.bots.length + ":" + game.settings.maxPlayers);
+
+            if (game.bots.length == game.settings.maxPlayers)
+                setInterval(function(){
+                    takeTurn();
+                    console.log("turn");
+                },300);
+        });
+    }
+
+
 //
 //    setInterval(function(){
-//        socket.emit('updateGame',newGame());
+//        socket.emit('updateGame', game);
+//        console.log("SENDING VIEW"); //TODO: ONLY SENd when turn done
 //    },3000);
 //    socket.on('message', function(data){
 //        socket.broadcast.emit('server_message',data);
@@ -91,11 +103,13 @@ var botTemplate = {
 
 
 function registerBot(host, port, callback){
-    postToBot(host, port, "start", game, function(response){
+    tmpBot = {host:host, port:port, position:{x:0,y:0}};
+    postToBot(tmpBot, "start", game, function(bot, response){
 //        response = {
 //            name : "testBot",
 //            version : "0.1"
 //        }
+
         if (response.name && response.version) {
 
             // find position
@@ -110,16 +124,17 @@ function registerBot(host, port, callback){
             }
 
             var bot = {
-                id: bots.length,
+                id: game.bots.length,
                 name: response.name,
                 version: response.version,
                 host: host,
                 port: port,
-                position: {}
+                position: position,
+                alive: true
 
 
             };
-            game.bots.push();
+            game.bots.push(bot);
         }
         callback();
     });
@@ -127,57 +142,75 @@ function registerBot(host, port, callback){
 function takeTurn(){
 
     var botsMoved = 0;
-//    moves = [];
 
     for (var i = 0; i < game.bots.length; i++) {
         var bot = game.bots[i];
 
-        postToBot(bot.host,bot.port,"move",game,function(response){
+        postToBot(bot,"move",game,function(bot, response){
 //            response = {
 //                direction: direction,
 //                mine: Math.floor(Math.random()*2) // 0 || 1
 //            }
             // todo : check for legal move
+            botsMoved ++;
 
+
+            //clear old position
             if (response.mine){
                 game.board[bot.position.x][bot.position.y] = "b";
             }else {
                 game.board[bot.position.x][bot.position.y] = "e";
             }
 
-            bot.position.x += response.x;
-            bot.position.y += response.y;
+            bot.position.x += response.direction.x;
+            bot.position.y += response.direction.y;
 
-//            response.bot = bot;
-//            moves.push(response);
-
-            botsMoved ++;
 
             if (botsMoved == game.bots.length) {
 
                 for (var j = 0; j < game.bots.length; j++) {
                     var bot = game.bots[j];
 
-                    // walked in to bomb
-                    if (game.board[bot.position.x][bot.position.y] == 'b'){
-                        //todo:// bot: die!!!
+
+                    // end of board
+                    if (bot.position.x >= game.board.length || bot.position.x < 0 ||
+                        bot.position.y >= game.board[0].length || bot.position.y < 0){
+                        bot.alive = false;
                     }
-                    for (var k = j + 1; k < game.bots.length; k++) {
-                        var bot2 = game.bots[k];
-                        // samma ruta
-                        if (bot.position.x == bot2.position.x && bot.position.y == bot2.position.y){
-                            // todo: bot and bot2 die
+
+                    // walked in to bomb
+                    else if (game.board[bot.position.x][bot.position.y] == 'b'){
+                        bot.alive = false;
+                    }
+                    else {
+                        for (var k = j + 1; k < game.bots.length; k++) {
+                            var bot2 = game.bots[k];
+                            // samma ruta
+                            if (bot.position.x == bot2.position.x && bot.position.y == bot2.position.y){
+                                bot.alive = false;
+                                bot2.alive = false;
+                            }
                         }
                     }
+
                     //todo:cahnge
-                    game.board[bot.position.x][bot.position.y] = bot.id
+                    if (bot.alive)
+                    {
+                        game.board[bot.position.x][bot.position.y] = bot.id;
+                    }
 
                 }
 
+                // remove dead bots
+                game.bots = game.bots.filter(function (bot) {
+                    return bot.alive;
+                });
+                
                 game.round++;
                 game.timer--;
                 io.sockets.emit('updateGame', game);
-                takeTurn();
+                console.log("update view");
+//                takeTurn();
             }
 
 
@@ -186,19 +219,19 @@ function takeTurn(){
     }
 
 }
-var exampleBoard =
-    [
-        ["e","e","e","b","b","g","e","e","e","b"],
-        ["e","b","e","e","e","e","e","e","e","e"],
-        ["e","e","e","e","e","e","e","e","e","b"],
-        ["e","e","g","e","0","e","e","e","e","b"],
-        ["e","e","e","e","e","e","e","e","e","g"],
-        ["e","b","e","b","e","e","e","e","e","e"],
-        ["e","b","e","e","e","e","e","e","e","e"],
-        ["e","b","e","e","e","e","e","e","e","e"],
-        ["e","e","e","e","e","e","e","g","b","e"],
-        ["e","b","e","e","e","e","e","e","e","b"]
-    ];
+//var exampleBoard =
+//    [
+//        ["e","e","e","b","b","g","e","e","e","b"],
+//        ["e","b","e","e","e","e","e","e","e","e"],
+//        ["e","e","e","e","e","e","e","e","e","b"],
+//        ["e","e","g","e","0","e","e","e","e","b"],
+//        ["e","e","e","e","e","e","e","e","e","g"],
+//        ["e","b","e","b","e","e","e","e","e","e"],
+//        ["e","b","e","e","e","e","e","e","e","e"],
+//        ["e","b","e","e","e","e","e","e","e","e"],
+//        ["e","e","e","e","e","e","e","g","b","e"],
+//        ["e","b","e","e","e","e","e","e","e","b"]
+//    ];
 
 // "e" = empty
 // "b" = bomb
@@ -211,7 +244,8 @@ function newGame() {
     for (var i = 0; i < gameSettings.boardSize.x; i++){
         board[i] = [];
         for (var j = 0; j < gameSettings.boardSize.y; j++){
-            board[i][j] = types[Math.round(Math.random() * 3)];
+//            board[i][j] = types[Math.round(Math.random() * 3)];
+            board[i][j] = types[0];
         }
     }
     return {
@@ -230,25 +264,32 @@ function newGame() {
  * todo:timeout
  */
 
-function postToBot(host, port, message, data, callback) {
+function postToBot(bot, message, data, callback) {
+
     data = JSON.stringify(data);
 
     var options = {
-        hostname: host,
-        port: port,
+        hostname: bot.host,
+        port: bot.port,
         path: '/' + message,
         method: 'POST'
     };
 
-    var request = http.request(options, function(res) {
-        console.log('STATUS: ' + res.statusCode);
-        console.log('HEADERS: ' + JSON.stringify(res.headers));
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-            console.log('BODY: ' + chunk);
+    var request = http.request(options, function(response) {
+        console.log('STATUS: ' + response.statusCode);
+        console.log('HEADERS: ' + JSON.stringify(response.headers));
+        response.setEncoding('utf8');
+
+        var responseData = '';
+        response.on('data', function(chunk) {
+            responseData += chunk;
         });
-        res.on('end', function() {
-            // do what you do
+        response.on('end', function() {
+            console.log('responce:');
+            console.log(responseData);
+            responseData = JSON.parse(responseData);
+            console.log(responseData);
+            callback(bot, responseData);
         });
     });
 
@@ -262,16 +303,19 @@ function postToBot(host, port, message, data, callback) {
 //        });
 //    });
 
-    var responseData = '';
-    request.on('response', function(response) {
-        response.on('data', function(chunk) {
-            responseData += chunk;
-        });
-        response.on('end', function() {
-            responseData = JSON.parse(responseData);
-            callback(responseData);
-        });
-    });
+//    var responseData = '';
+//    request.on('response', function(response) {
+//        console.log('onResponce:');
+//        response.on('data', function(chunk) {
+//            console.log('onData2:');
+//            responseData += chunk;
+//        });
+//        response.on('end', function() {
+//            console.log('onend2:');
+//            responseData = JSON.parse(responseData);
+//            callback(responseData);
+//        });
+//    });
 
     request.on('error', function(e) {
         console.log('problem with request: ' + e.message);
@@ -281,15 +325,3 @@ function postToBot(host, port, message, data, callback) {
     request.write(data);
     request.end();
 }
-
-//postToBot("127.0.0.1",1337,"ping",{data:"cool data"}, function(response){
-//    console.log("responce: ");
-//    console.log(response);
-//});
-//postToBot("127.0.0.1",1337,"move",{data:"this should be the game"}, function(response){
-//    console.log("responce: ");
-//    console.log(response);
-//});
-
-
-console.log('Listening on http://0.0.0.0:' + port );
