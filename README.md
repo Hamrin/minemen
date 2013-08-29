@@ -17,19 +17,18 @@ To start a project:
 
 This will copy down all of the files, organize them appropriately and init a fresh new git repository within which you can build your next big thing.
 
+Install required dependencies (express and socket.io):
+        cd minemen
+        npm install
 
 To run the MineMen app:
 
 		node server.js
 
-In case of you encounter error regarding socket.io run the below command within the minemen directory:
-
-        npm install socket.io
-
-If successfully able to run the server you will get the port number. i.e: 5000
+If successfully able to run the server you will get the port number. i.e: 8081
 
 Go to :
 
-        http://localhost:5000
+        http://localhost:8081
 
-and you will get the welcome message.
+and you will see the GUI for the game.
