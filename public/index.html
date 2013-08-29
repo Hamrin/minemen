@@ -1,31 +1,85 @@
 <html>
 <head>
-<script src="/js/vendor/socket.io.min.js"/>
-<script type="text/javascript">
+    <style type="text/css">
+        body {
+            border-width: 0px;
+            padding: 0px;
+            margin: 0px;
+            font-size: 90%;
+            background-color: #e7e7de
+        }
+        .wrapper{
+            position: relative;
+            float: left;
+            left: 0px;
+            /*width: 260px;*/
+            margin-bottom: 1px;
+            margin-top: 1px;
+            background-color: #cccccc
+        }
+
+        .box,.e,.b,.g,.bot {
+            position: relative;
+            float: left;
+            left: 0px;
+            width: 50px;
+            height: 50px;
+            margin-left: 1px;
+            margin-right: 1px;
+            /*border-color: #000;*/
+            /*border: 1px solid;*/
+            background-color: #828282
+        }
+        .e{
+            background-color: #828282
+        }
+        .b{
+            background-color: #383838
+        }
+        .g{
+            background-color: #FBD085
+        }
+        .bot{
+            background-color: #fff
+        }
+
+    </style>
+    <script src="/js/vendor/socket.io.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
     window.onload = function() {
-        console.log("window on load");
-        var messages = [];
+        console.log('window on load');
+
         var socket = io.connect('http://localhost:8081');
         var content = document.getElementById("content");
 
-        socket.on('server_message', function (data) {
-            if(data.message) {
-                messages.push(data.message);
-                var html = '';
-                for(var i=0; i<messages.length; i++) {
-                    html += messages[i] + '<br />';
+        socket.emit("connection",{message:"hello from view"});
+
+        socket.on('updateGame', function (data) {
+            console.log(data.board.length);
+            if(data) {
+                content.innerHTML = "";
+                for (var i = 0; i < data.board.length; i++) {
+//                    console.log(data.board[i]);
+                    content.innerHTML += "<div class='wrapper' id='w" + i + "'</div>";
+                    for (var j = 0; j < data.board[i].length; j++) {
+                        var wrapper = document.getElementById('w' + i);
+                        if(data.board[i][j].hasOwnProperty('id')) {
+                            // bot, style accordinlgy
+                        }
+                        wrapper.innerHTML += "<div class='" + data.board[i][j] + "' id='b" + j + "'</div>";
+//                        console.log(data.board[i][j]);
+                    }
                 }
-                content.innerHTML = html;
             } else {
                 console.log("There is a problem:", data);
             }
         });
 
     }
-</script>
+    </script>
 </head>
 <body>
-<div style="float:left; margin: 5px 5px 5px 5px; border: solid #CCC 1px; width: 300px; height: 300px; font-size: 8pt; vertical-align: middle; color: #777;" id="content">
+<div style="float:left; margin: 5px 5px 5px 5px; border: solid #CCC 1px; width: 600px; font-size: 12pt; vertical-align: middle; color: #777;" id="content">
 
 </div>
 

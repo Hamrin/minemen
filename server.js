@@ -16,17 +16,23 @@ server.configure(function(){
 
 var httpServer = server.listen( port);
 
+var maxBots = 10;
+var botsRegistered = 10;
+
 //Setup Socket.IO
 io = io.listen(httpServer);
 io.sockets.on('connection', function(socket){
-  console.log('Client Connected');
-  socket.on('message', function(data){
-    socket.broadcast.emit('server_message',data);
-    socket.emit('server_message',data);
-  });
-  socket.on('disconnect', function(){
-    console.log('Client Disconnected.');
-  });
+    console.log('Client Connected');
+    if(botsRegistered == maxBots) {
+        socket.emit('updateGame',newGame());
+    }
+
+//    socket.on('message', function(data){
+//        socket.broadcast.emit('server_message',data);
+//    });
+    socket.on('disconnect', function(){
+      console.log('Client Disconnected.');
+    });
 });
 
 // assuming POST: name=foo&color=red
@@ -54,9 +60,9 @@ server.get('/', function(req,res){
 ///////////////////////////////////////////
 
 
-var gameSetings = {
+var gameSettings = {
     botTimeout:"100", //ms
-    gameLenth:5000, //turns
+    gameLength:5000, //turns
     boardSize:{x:5, y:5}
 };
 
@@ -71,11 +77,16 @@ var botExample = {
 
 var exampleBoard =
     [
-        ["e","e","e","e","e"],
-        ["e","e","e","e","e"],
-        ["e","e","g","b","e"],
-        ["e","e","e","e","e"],
-        ["e","e","e","e","e"]
+        ["e","e","e","b","b","g","e","e","e","b"],
+        ["e","b","e","e","e","e","e","e","e","e"],
+        ["e","e","e","e","e","e","e","e","e","b"],
+        ["e","e","g","e","e","e","e","e","e","b"],
+        ["e","e","e","e","e","e","e","e","e","g"],
+        ["e","b","e","b","e","e","1","e","e","e"],
+        ["e","b","e","e","e","e","e","e","e","e"],
+        ["e","b","e","e","2","e","e","e","e","e"],
+        ["e","e","e","e","e","e","e","g","b","e"],
+        ["e","b","e","e","e","e","e","e","e","b"]
     ];
 
 // "e" = empty
@@ -85,9 +96,9 @@ var exampleBoard =
 
 function newGame() {
     var board = [];
-    for (var i = 0; i < gameSetings.boardSize.x; i++){
+    for (var i = 0; i < gameSettings.boardSize.x; i++){
         board[i] = [];
-        for (var j = 0; j < gameSetings.boardSize.y; j++){
+        for (var j = 0; j < gameSettings.boardSize.y; j++){
             board[i][j] = "e";
         }
     }
@@ -95,8 +106,8 @@ function newGame() {
         round : 0,
         bots: [botExample],
         board: exampleBoard,
-        timer: gameSetings.gameLenth,
-        settings: gameSetings
+        timer: gameSettings.gameLength,
+        settings: gameSettings
     };
 }
 
@@ -160,14 +171,14 @@ function postToBot(host, port, message, data, callback) {
     request.end();
 }
 
-postToBot("127.0.0.1",1337,"ping",{data:"cool data"}, function(response){
-    console.log("responce: ");
-    console.log(response);
-});
-postToBot("127.0.0.1",1337,"move",{data:"this should be the game"}, function(response){
-    console.log("responce: ");
-    console.log(response);
-});
+//postToBot("127.0.0.1",1337,"ping",{data:"cool data"}, function(response){
+//    console.log("responce: ");
+//    console.log(response);
+//});
+//postToBot("127.0.0.1",1337,"move",{data:"this should be the game"}, function(response){
+//    console.log("responce: ");
+//    console.log(response);
+//});
 
 
 console.log('Listening on http://0.0.0.0:' + port );
