@@ -24,6 +24,7 @@ window.onload = function() {
                                 console.log("Found bot " + bots[bot].id + " on board at " + "x:" + j + ", y:" + i);
                             }
                         }
+//                        wrapper.innerHTML += "<div style=\"background-image: url('" + bots[bot].avatar +  "'); width: 50px; height:50px;\"</div>";
                         wrapper.innerHTML += "<div class='bot' id='x" + j + "'</div>";
                     } else {
                         wrapper.innerHTML += "<div class='" + data.board[i][j] + "' id='x" + j + "'</div>";

@@ -39,15 +39,16 @@ body {
     /*background-color: #FBFBFB*/
 }
 .e{
-    background-color: #e7e7de
+    background-color: #fff
 }
 .b{
-    background-color: #e7e7de;
+    background-color: #fff;
     background-image: url('/gfx/bomb.png')
 }
 .g{
-    background-color: #FBD085
+    background-color: #fff;
+    background-image: url('/gfx/gold.gif')
 }
 .bot{
-    background-color: #fff
+    background-color: #ff0000
 }

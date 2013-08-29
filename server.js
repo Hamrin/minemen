@@ -76,6 +76,7 @@ var botExample = {
     port:5353,
     startPosition:{x:0,y:0},
     color:0xFF00FF,
+    avatar: 'http://www.patchtogether.com/media/members/icons/MEMBER_ICON_4964098027bdb_mewshaw.gif',
     points:0
 };
 
@@ -99,11 +100,12 @@ var exampleBoard =
 // id/index = player
 
 function newGame() {
+    var types = ["e","g","b","0"];
     var board = [];
     for (var i = 0; i < gameSettings.boardSize.x; i++){
         board[i] = [];
         for (var j = 0; j < gameSettings.boardSize.y; j++){
-            board[i][j] = "e";
+            board[i][j] = types[Math.round(Math.random() * 3)];
         }
     }
     return {
