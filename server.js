@@ -1,7 +1,6 @@
 //setup Dependencies
 var express = require('express')
     , io = require('socket.io')
-    , port = (process.env.PORT || 8081)
     , http = require('http');
 
 //Setup Express
@@ -14,18 +13,31 @@ server.configure(function(){
     server.use(server.router);
 });
 
-var httpServer = server.listen( port);
 
-var maxBots = 10;
-var botsRegistered = 10;
+var port = 8081;
+var httpServer = server.listen(port);
+var gameSettings = {
+    botTimeout:"100", //ms
+    gameLength:5000, //turns
+    boardSize:{x:10, y:10},
+    maxPlayers: 4
+};
+var game = newGame();
+
+// register testBots
+for (var i = 0; i < game.settings.maxPlayers; i++) {
+    registerBot("127.0.0.1", 1337 + i, function(){
+        if (bots.length == game.settings.maxPlayers)
+        takeTurn();
+    });
+
+
+}
 
 //Setup Socket.IO
 io = io.listen(httpServer);
 io.sockets.on('connection', function(socket){
     console.log('Client Connected');
-    if(botsRegistered == maxBots) {
-        socket.emit('updateGame',newGame());
-    }
 //
 //    setInterval(function(){
 //        socket.emit('updateGame',newGame());
@@ -63,23 +75,117 @@ server.get('/', function(req,res){
 ///////////////////////////////////////////
 
 
-var gameSettings = {
-    botTimeout:"100", //ms
-    gameLength:5000, //turns
-    boardSize:{x:10, y:10}
-};
 
-var botExample = {
+
+var botTemplate = {
     id:0,
-    name:"sampleBot2000",
+    name:"noName",
+    version: "0.1",
     host:"yourIP.com",
-    port:5353,
-    startPosition:{x:0,y:0},
+    port:1337,
+    position:{x:0,y:0},
     color:0xFF00FF,
     avatar: 'http://www.patchtogether.com/media/members/icons/MEMBER_ICON_4964098027bdb_mewshaw.gif',
     points:0
 };
 
+
+function registerBot(host, port, callback){
+    postToBot(host, port, "start", game, function(response){
+//        response = {
+//            name : "testBot",
+//            version : "0.1"
+//        }
+        if (response.name && response.version) {
+
+            // find position
+            var position = {
+                x:Math.floor((Math.random()* game.settings.boardSize.x)),
+                y:Math.floor((Math.random()* game.settings.boardSize.y))
+            };
+            while (game.board[position.x][position.y] != 'e')
+            {
+                position.x = Math.floor((Math.random()* game.settings.boardSize.x));
+                position.y = Math.floor((Math.random()* game.settings.boardSize.y));
+            }
+
+            var bot = {
+                id: bots.length,
+                name: response.name,
+                version: response.version,
+                host: host,
+                port: port,
+                position: {}
+
+
+            };
+            game.bots.push();
+        }
+        callback();
+    });
+}
+function takeTurn(){
+
+    var botsMoved = 0;
+//    moves = [];
+
+    for (var i = 0; i < game.bots.length; i++) {
+        var bot = game.bots[i];
+
+        postToBot(bot.host,bot.port,"move",game,function(response){
+//            response = {
+//                direction: direction,
+//                mine: Math.floor(Math.random()*2) // 0 || 1
+//            }
+            // todo : check for legal move
+
+            if (response.mine){
+                game.board[bot.position.x][bot.position.y] = "b";
+            }else {
+                game.board[bot.position.x][bot.position.y] = "e";
+            }
+
+            bot.position.x += response.x;
+            bot.position.y += response.y;
+
+//            response.bot = bot;
+//            moves.push(response);
+
+            botsMoved ++;
+
+            if (botsMoved == game.bots.length) {
+
+                for (var j = 0; j < game.bots.length; j++) {
+                    var bot = game.bots[j];
+
+                    // walked in to bomb
+                    if (game.board[bot.position.x][bot.position.y] == 'b'){
+                        //todo:// bot: die!!!
+                    }
+                    for (var k = j + 1; k < game.bots.length; k++) {
+                        var bot2 = game.bots[k];
+                        // samma ruta
+                        if (bot.position.x == bot2.position.x && bot.position.y == bot2.position.y){
+                            // todo: bot and bot2 die
+                        }
+                    }
+                    //todo:cahnge
+                    game.board[bot.position.x][bot.position.y] = bot.id
+
+                }
+
+                game.round++;
+                game.timer--;
+                io.sockets.emit('updateGame', game);
+                takeTurn();
+            }
+
+
+        });
+
+    }
+
+}
 var exampleBoard =
     [
         ["e","e","e","b","b","g","e","e","e","b"],
@@ -110,13 +216,12 @@ function newGame() {
     }
     return {
         round : 0,
-        bots: [botExample],
-        board: exampleBoard,
+        bots: [],
+        board: board,
         timer: gameSettings.gameLength,
         settings: gameSettings
     };
 }
-
 
 /**
  * to post messages to bots

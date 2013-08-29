@@ -20,16 +20,16 @@ for (var i = 0; i < 4; i++) {
                 console.log("message received.");
                 console.log(body);
 
-                var responce = {};
+                var response = {};
 
                 if (request.url == '/ping'){
 
-                    responce.message = "pong";
+                    response.message = "pong";
 
                 }
                 else if (request.url == '/start'){
                     var game = body;
-                    responce = {
+                    response = {
                         name : "testBot",
                         version : "0.1"
                     }
@@ -45,7 +45,7 @@ for (var i = 0; i < 4; i++) {
                         direction.y = Math.floor((Math.random()*3)-1); // -1 || 0 || 1
                     }
 
-                    responce = {
+                    response = {
                         direction: direction,
                         mine: Math.floor(Math.random()*2) // 0 || 1
                     }
@@ -64,7 +64,7 @@ for (var i = 0; i < 4; i++) {
                         console.log("===== server error: " + data.error);
                     }
                 }
-                res.write(JSON.stringify(responce));
+                res.write(JSON.stringify(response));
 
 //            res.writeHead(200, {'Content-Type': 'text/plain'});
 //            res.end('Bot says thank you.\n');
