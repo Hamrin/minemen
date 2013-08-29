@@ -25,13 +25,14 @@ body {
     margin-right: 1px;
     /*border-color: #000;*/
     /*border: 1px solid;*/
-    background-color: #FBFBFB
+    /*background-color: #FBFBFB*/
 }
 .e{
-    background-color: #828282
+    background-color: #FBFBFB
 }
 .b{
-    background-color: #383838
+    background-color: #FBFBFB;
+    background-image: url('/gfx/bomb.png')
 }
 .g{
     background-color: #FBD085

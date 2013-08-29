@@ -109,7 +109,7 @@ function newGame() {
     return {
         round : 0,
         bots: [botExample],
-        board: board,
+        board: exampleBoard,
         timer: gameSettings.gameLength,
         settings: gameSettings
     };
