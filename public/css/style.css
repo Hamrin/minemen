@@ -3,8 +3,19 @@ body {
     padding: 0px;
     margin: 0px;
     font-size: 90%;
-    background-color: #e7e7de
+    background-color: #383838
 }
+
+.content {
+    float: left;
+    margin: 5px 5px 5px 5px;
+    border: solid #000 1px;
+    width: 520px;
+    font-size: 12pt;
+    vertical-align: middle;
+    color: #777
+}
+
 .wrapper{
     position: relative;
     float: left;
@@ -12,7 +23,7 @@ body {
     /*width: 260px;*/
     margin-bottom: 1px;
     margin-top: 1px;
-    background-color: #cccccc
+    background-color: #000
 }
 
 .box,.e,.b,.g,.bot {
@@ -28,10 +39,10 @@ body {
     /*background-color: #FBFBFB*/
 }
 .e{
-    background-color: #FBFBFB
+    background-color: #e7e7de
 }
 .b{
-    background-color: #FBFBFB;
+    background-color: #e7e7de;
     background-image: url('/gfx/bomb.png')
 }
 .g{
