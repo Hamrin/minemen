@@ -75,7 +75,7 @@ for (var i = 0; i < 4; i++) {
             res.end('Hello THis is Tha BOT.\n');
         }
     }).listen(port + i, '0.0.0.0');
-},
+}
 
 
 //}).listen(1337, '127.0.0.1');
