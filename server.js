@@ -26,7 +26,10 @@ io.sockets.on('connection', function(socket){
     if(botsRegistered == maxBots) {
         socket.emit('updateGame',newGame());
     }
-
+//
+//    setInterval(function(){
+//        socket.emit('updateGame',newGame());
+//    },3000);
 //    socket.on('message', function(data){
 //        socket.broadcast.emit('server_message',data);
 //    });
@@ -63,7 +66,7 @@ server.get('/', function(req,res){
 var gameSettings = {
     botTimeout:"100", //ms
     gameLength:5000, //turns
-    boardSize:{x:5, y:5}
+    boardSize:{x:10, y:10}
 };
 
 var botExample = {
@@ -72,6 +75,7 @@ var botExample = {
     host:"yourIP.com",
     port:5353,
     startPosition:{x:0,y:0},
+    color:0xFF00FF,
     points:0
 };
 
@@ -80,11 +84,11 @@ var exampleBoard =
         ["e","e","e","b","b","g","e","e","e","b"],
         ["e","b","e","e","e","e","e","e","e","e"],
         ["e","e","e","e","e","e","e","e","e","b"],
-        ["e","e","g","e","e","e","e","e","e","b"],
+        ["e","e","g","e","0","e","e","e","e","b"],
         ["e","e","e","e","e","e","e","e","e","g"],
-        ["e","b","e","b","e","e","1","e","e","e"],
+        ["e","b","e","b","e","e","e","e","e","e"],
         ["e","b","e","e","e","e","e","e","e","e"],
-        ["e","b","e","e","2","e","e","e","e","e"],
+        ["e","b","e","e","e","e","e","e","e","e"],
         ["e","e","e","e","e","e","e","g","b","e"],
         ["e","b","e","e","e","e","e","e","e","b"]
     ];
@@ -105,7 +109,7 @@ function newGame() {
     return {
         round : 0,
         bots: [botExample],
-        board: exampleBoard,
+        board: board,
         timer: gameSettings.gameLength,
         settings: gameSettings
     };
