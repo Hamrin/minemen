@@ -1,3 +1,10 @@
+function getBotHSLColor(botIndex) {
+    var h = parseInt(++botIndex) * 40;
+    var s = 100;
+    var l = 80;
+    return 'hsl(' + h + '0,' + s + '%,' + l + '%)';
+}
+
 window.onload = function() {
     console.log('window on load');
 
@@ -24,8 +31,18 @@ window.onload = function() {
                                 console.log("Found bot " + bots[bot].id + " on board at " + "x:" + j + ", y:" + i);
                             }
                         }
-//                        wrapper.innerHTML += "<div style=\"background-image: url('" + bots[bot].avatar +  "'); width: 50px; height:50px;\"</div>";
-                        wrapper.innerHTML += "<div class='bot' id='x" + j + "'</div>";
+
+                        console.log("Avatar: " + bots[parseInt(data.board[i][j])].avatar);
+
+                        // If the bot has an avatar: show that, otherwise assign it a colour.
+                        if(bots[bot].hasOwnProperty('avatar') && bots[bot].avatar.length > 1)
+                        {
+                            wrapper.innerHTML += "<div class='bot' style='background-image: url(" + bots[parseInt(data.board[i][j])].avatar + "); width: 50px; height:50px;'</div>";
+                        }
+                        else
+                        {
+                            wrapper.innerHTML += "<div class='bot' name='bot"+data.board[i][j]+"' style='background-color:" + getBotHSLColor(data.board[i][j]) + "; width: 50px; height:50px;'</div>";
+                        }
                     } else {
                         wrapper.innerHTML += "<div class='" + data.board[i][j] + "' id='x" + j + "'</div>";
                     }

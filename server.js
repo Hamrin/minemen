@@ -97,7 +97,18 @@ var botTemplate = {
     port:1337,
     position:{x:0,y:0},
     color:0xFF00FF,
-    avatar: 'http://www.patchtogether.com/media/members/icons/MEMBER_ICON_4964098027bdb_mewshaw.gif',
+    avatar: 'http://qph.is.quoracdn.net/main-thumb-t-320337-50-6cPmQu84LkMbOYDGaRXbK2vP4vV4SnBq.jpeg',
+    points:0
+};
+
+var botExample2 = {
+    id:1,
+    name:"sampleBot2001",
+    host:"yourIP1.com",
+    port:5353,
+    startPosition:{x:1,y:1},
+    color:0xFF00FF,
+    avatar: '',
     points:0
 };
 
@@ -233,6 +244,7 @@ function takeTurn(){
 //        ["e","b","e","e","e","e","e","e","e","b"]
 //    ];
 
+
 // "e" = empty
 // "b" = bomb
 // "g" = gold
@@ -251,7 +263,6 @@ function newGame() {
     return {
         round : 0,
         bots: [],
-        board: board,
         timer: gameSettings.gameLength,
         settings: gameSettings
     };
