@@ -23,28 +23,31 @@ window.onload = function() {
                 content.innerHTML += "<div class='wrapper' id='y" + i + "'</div>";
                 for (var j = 0; j < data.board[i].length; j++) {
                     var wrapper = document.getElementById('y' + i);
-                    var obj = data.board[i][j];
-                    var isnum = /^\d+$/.test(obj);
+                    var cellValue = data.board[i][j];
+                    var isnum = /^\d+$/.test(cellValue);
                     if(isnum) {
+                        console.log("Number of bots: " + bots.length + ": (" + bots + ")");
                         for(var bot in bots) {
-                            if(obj == bots[bot].id.toString()) {
+                            if(cellValue == bots[bot].id.toString()) {
                                 console.log("Found bot " + bots[bot].id + " on board at " + "x:" + j + ", y:" + i);
                             }
                         }
 
-                        console.log("Avatar: " + bots[parseInt(data.board[i][j])].avatar);
+                        var theBot = bots[parseInt(cellValue)];
 
                         // If the bot has an avatar: show that, otherwise assign it a colour.
-                        if(bots[bot].hasOwnProperty('avatar') && bots[bot].avatar.length > 1)
+                        if(theBot.hasOwnProperty('avatar') && theBot.avatar.length > 1)
                         {
-                            wrapper.innerHTML += "<div class='bot' style='background-image: url(" + bots[parseInt(data.board[i][j])].avatar + "); width: 50px; height:50px;'</div>";
+                            console.log("Avatar: " + theBot.avatar);
+
+                            wrapper.innerHTML += "<div class='bot' style='background-image: url(" + theBot.avatar + "); width: 50px; height:50px;'</div>";
                         }
                         else
                         {
-                            wrapper.innerHTML += "<div class='bot' name='bot"+data.board[i][j]+"' style='background-color:" + getBotHSLColor(data.board[i][j]) + "; width: 50px; height:50px;'</div>";
+                            wrapper.innerHTML += "<div class='bot' name='bot" + cellValue + "' style='background-color:" + getBotHSLColor(cellValue) + "; width: 50px; height:50px;'</div>";
                         }
                     } else {
-                        wrapper.innerHTML += "<div class='" + data.board[i][j] + "' id='x" + j + "'</div>";
+                        wrapper.innerHTML += "<div class='" + cellValue + "' id='x" + j + "'</div>";
                     }
                 }
             }
