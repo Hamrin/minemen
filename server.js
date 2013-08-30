@@ -205,8 +205,6 @@ function takeTurn(){
                     logToView("bot" + bot.id + " died by sending an illegal move");
                 }
                 else {
-                    bot.position.x += move.direction.x;
-                    bot.position.y += move.direction.y;
 
                     //clear old position
                     if (move.mine){
@@ -214,6 +212,11 @@ function takeTurn(){
                     }else {
                         game.board[bot.position.x][bot.position.y] = "e";
                     }
+
+                    logToView("bot" + bot.id + " moves x:" + move.direction.x + ", y: " + move.direction.y);
+                    bot.position.x += move.direction.x;
+                    bot.position.y += move.direction.y;
+
                 }
             }
         }
@@ -252,6 +255,7 @@ function takeTurn(){
                 {
                     game.board[bot.position.x][bot.position.y] = bot.id;
                 }
+                console.log(game.board);//todo: find
             }
         }
 
