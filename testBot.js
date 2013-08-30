@@ -5,6 +5,7 @@ var port = 1337;
 var serverHost = "127.0.0.1";
 
 
+
 for (var i = 0; i < 4; i++) {
     http.createServer(function (request, res) {
         // handle the routes
@@ -24,47 +25,17 @@ for (var i = 0; i < 4; i++) {
                 var response = {};
 
                 if (request.url == '/ping'){
-
-                    response.message = "pong";
-
+                    response = onPing();
                 }
                 else if (request.url == '/start'){
-                    var game = body;
-                    response = {
-                        name : "testBot",
-                        version : "0.1"
-                    }
+                    response = onStart(body);
                 }
                 else if (request.url == '/move'){
 
-                    var game = body;
-
-                    var direction = {x:0, y:0};
-
-                    while (Math.abs(direction.x) + Math.abs(direction.y) != 1) // we cant stand still
-                    {
-                        direction.x = Math.floor((Math.random()*3)-1); // -1 || 0 || 1
-                        direction.y = Math.floor((Math.random()*3)-1); // -1 || 0 || 1
-                    }
-
-                    response = {
-                        direction: direction,
-                        mine: Math.floor(Math.random()*2) // 0 || 1
-                    }
+                    response = onMove(body);
                 }
                 else if (request.url == '/log'){
-                    var data = {
-                        message : "just a message",
-                        error : "if error"
-                    };
-
-                    data = body;
-                    if (data.message){
-                        console.log("server message: " + data.message);
-                    }
-                    if (data.error){
-                        console.log("===== server error: " + data.error);
-                    }
+                    response = onLog(body);
                 }
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.write(JSON.stringify(response));
@@ -77,6 +48,40 @@ for (var i = 0; i < 4; i++) {
             res.end('Hello THis is Tha BOT.\n');
         }
     }).listen(port + i, '0.0.0.0');
+}
+function onPing(){
+    return {message: "pong"};
+}
+function onStart(game){
+    return {
+        name : "testBot",
+        version : "0.1"
+    }
+}
+function onMove(game){
+
+    var direction = {x:0, y:0};
+
+    while (Math.abs(direction.x) + Math.abs(direction.y) != 1) // we cant stand still
+    {
+        direction.x = Math.floor((Math.random()*3)-1); // -1 || 0 || 1
+        direction.y = Math.floor((Math.random()*3)-1); // -1 || 0 || 1
+    }
+
+    return {
+        direction: direction,
+        mine: Math.floor(Math.random()*2) // 0 || 1
+    }
+}
+function onLog(data){
+
+    if (data.message){
+        console.log("server message: " + data.message);
+    }
+    if (data.error){
+        console.log("===== server error: " + data.error);
+    }
+    return {};
 }
 
 

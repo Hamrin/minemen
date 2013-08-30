@@ -23,7 +23,7 @@ div#container {
     height:auto !important; /* real browsers */
     /*height:100%; *//* IE6: treaded as min-height*/
 
-    min-height:100%;  real browsers
+    min-height:100%;
 }
 div#footer {
     position:absolute;

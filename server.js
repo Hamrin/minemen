@@ -34,6 +34,7 @@ io.sockets.on('connection', function(socket){
     logToView('updateGame');
 
     // register testBots
+    game = newGame();
     for (var i = 0; i < game.settings.maxPlayers; i++) {
         registerBot("127.0.0.1", 1337 + i, function(){
             console.log("register");
@@ -43,9 +44,11 @@ io.sockets.on('connection', function(socket){
             if (game.bots.length == game.settings.maxPlayers)
                 setInterval(function(){
                     takeTurn();
+                    console.log(game.board);
                     console.log("turn");
                     logToView('new turn');
-                },2000);
+
+                },1000);
         });
     }
 
@@ -144,8 +147,6 @@ function registerBot(host, port, callback){
                 port: port,
                 position: position,
                 alive: true
-
-
             };
             game.bots.push(bot);
         }
@@ -166,23 +167,25 @@ function takeTurn(){
                 movesCollected++;
                 moves[bot.id] = undefined;
             }
+            else {
+                postToBot(bot, "move" ,game, function(bot, move) {
+                    // validate response
+                    if (move.direction && move.direction.x && move.direction.y &&
+                        Math.abs(move.direction.x) + Math.abs(move.direction.y) == 1 &&
+                        move.mine && (move.mine == 1 || move.mine == 0)){
+                        moves.push(undefined);
+                        //todo:message
+                    }else {
+                        moves[bot.id] = move;
+                    }
 
-            postToBot(bot, "move" ,game, function(bot, move) {
-                // validate response
-                if (move.direction && move.direction.x && move.direction.y &&
-                    Math.abs(move.direction.x) + Math.abs(move.direction.y) == 1 &&
-                    move.mine && (move.mine == 1 || move.mine == 0)){
-                    moves.push(undefined);
-                    //todo:message
-                }else {
-                    moves[bot.id] = move;
-                }
+                    movesCollected ++;
+                    if (movesCollected == game.bots.length) {
+                        callback(moves);
+                    }
+                });
+            }
 
-                movesCollected ++;
-                if (movesCollected == game.bots.length) {
-                    callback(moves);
-                }
-            });
         }
     }
 
@@ -193,6 +196,8 @@ function takeTurn(){
             var bot = game.bots[i];
 
             if (bot.alive){
+
+                console.log("move: " + i);
 
                 // todo: now invalid move kills the bot
                 // validate response
@@ -253,7 +258,6 @@ function takeTurn(){
                 {
                     game.board[bot.position.x][bot.position.y] = bot.id;
                 }
-                console.log(game.board);//todo: find
             }
         }
 
@@ -315,8 +319,8 @@ function postToBot(bot, message, data, callback) {
     };
 
     var request = http.request(options, function(response) {
-        console.log('STATUS: ' + response.statusCode);
-        console.log('HEADERS: ' + JSON.stringify(response.headers));
+//        console.log('STATUS: ' + response.statusCode);
+//        console.log('HEADERS: ' + JSON.stringify(response.headers));
         response.setEncoding('utf8');
 
         var responseData = '';
@@ -324,10 +328,10 @@ function postToBot(bot, message, data, callback) {
             responseData += chunk;
         });
         response.on('end', function() {
-            console.log('responce:');
-            console.log(responseData);
+//            console.log('responce:');
+//            console.log(responseData);
             responseData = JSON.parse(responseData);
-            console.log(responseData);
+//            console.log(responseData);
             callback(bot, responseData);
         });
     });
