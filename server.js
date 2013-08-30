@@ -44,7 +44,7 @@ io.sockets.on('connection', function(socket){
                 setInterval(function(){
                     takeTurn();
                     console.log("turn");
-                },300);
+                },2000);
         });
     }
 
@@ -264,6 +264,7 @@ function newGame() {
         round : 0,
         bots: [],
         timer: gameSettings.gameLength,
+        board: board,
         settings: gameSettings
     };
 }
