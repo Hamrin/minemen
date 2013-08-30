@@ -63,13 +63,11 @@ io.sockets.on('connection', function(socket){
     });
 });
 
-// assuming POST: name=foo&color=red
 server.post('/register', function(req, res) {
     console.log('-- Register Bot: --');
-    console.log('Name: ' + req.body.name);
-    console.log('IP: ' + req.body.ip);
+    console.log(req.body.name + "@" + req.body.ip + ":" + req.body.port);
     console.log('-------------------');
-    logToView('Bot registered:\n\t ' + 'Name: ' + req.body.name + '\n\tIP: ' + req.body.ip);
+    logToView('Bot registered:\n\t ' + req.body.name + "@" + req.body.ip + ":" + req.body.port);
     res.send('Bot registered!');
 });
 
