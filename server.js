@@ -23,8 +23,6 @@ var gameSettings = {
     maxPlayers: 4
 };
 
-var viewSocket;
-
 var viewConnected = false;
 var game = newGame();
 
@@ -32,7 +30,6 @@ io = io.listen(httpServer);
 io.sockets.on('connection', function(socket){
     console.log('Client Connected');
 
-    viewSocket = socket;
     socket.emit('updateGame', game);
     logToView('updateGame');
 
@@ -92,9 +89,7 @@ server.get('/', function(req,res){
 ///////////////////////////////////////////
 
 var logToView = function(logMsg) {
-    if(viewSocket != undefined) {
-        viewSocket.emit('debug', {log:logMsg});
-    }
+    io.sockets.emit('debug', {log:logMsg});
 };
 
 
@@ -207,6 +202,7 @@ function takeTurn(){
                     // todo: bot feedback
                     bot.alive = false;
                     game.board[bot.position.x][bot.position.y] = "e";
+                    logToView("bot" + bot.id + " died by sending an illegal move");
                 }
                 else {
                     bot.position.x += move.direction.x;
@@ -226,31 +222,36 @@ function takeTurn(){
         for (var j = 0; j < game.bots.length; j++) {
             var bot = game.bots[j];
 
-            // end of board
-            if (bot.position.x >= game.board.length || bot.position.x < 0 ||
-                bot.position.y >= game.board[0].length || bot.position.y < 0){
-                bot.alive = false;
-            }
+            if (bot.alive){
+                // end of board
+                if (bot.position.x >= game.board.length || bot.position.x < 0 ||
+                    bot.position.y >= game.board[0].length || bot.position.y < 0){
+                    bot.alive = false;
+                    logToView("bot" + bot.id + " died by stepping of the board");
+                }
 
-            // walked in to bomb
-            else if (game.board[bot.position.x][bot.position.y] == 'b'){
-                bot.alive = false;
-            }
-            else {
-                for (var k = j + 1; k < game.bots.length; k++) {
-                    var bot2 = game.bots[k];
-                    // samma ruta
-                    if (bot.position.x == bot2.position.x && bot.position.y == bot2.position.y){
-//                        && bot.alive && bot2.alive){
-                        bot.alive = false;
-                        bot2.alive = false;
+                // walked in to mine
+                else if (game.board[bot.position.x][bot.position.y] == 'b'){
+                    bot.alive = false;
+                    logToView("bot" + bot.id + " died by walking in to a mine" );
+                }
+                else {
+                    for (var k = j + 1; k < game.bots.length; k++) {
+                        var bot2 = game.bots[k];
+                        // samma ruta
+                        if (bot.position.x == bot2.position.x && bot.position.y == bot2.position.y){
+    //                        && bot.alive && bot2.alive){
+                            bot.alive = false;
+                            bot2.alive = false;
+                            logToView("bot" + bot.id + "and bot" + bot2.id + " died by walking in to a each other");
+                        }
                     }
                 }
-            }
 
-            if (bot.alive)
-            {
-                game.board[bot.position.x][bot.position.y] = bot.id;
+                if (bot.alive)
+                {
+                    game.board[bot.position.x][bot.position.y] = bot.id;
+                }
             }
         }
 
@@ -267,21 +268,6 @@ function takeTurn(){
         console.log("update view");
     }
 }
-
-
-//var exampleBoard =
-//    [
-//        ["e","e","e","b","b","g","e","e","e","b"],
-//        ["e","b","e","e","e","e","e","e","e","e"],
-//        ["e","e","e","e","e","e","e","e","e","b"],
-//        ["e","e","g","e","0","e","e","e","e","b"],
-//        ["e","e","e","e","e","e","e","e","e","g"],
-//        ["e","b","e","b","e","e","e","e","e","e"],
-//        ["e","b","e","e","e","e","e","e","e","e"],
-//        ["e","b","e","e","e","e","e","e","e","e"],
-//        ["e","e","e","e","e","e","e","g","b","e"],
-//        ["e","b","e","e","e","e","e","e","e","b"]
-//    ];
 
 
 // "e" = empty
