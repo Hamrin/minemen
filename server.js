@@ -161,84 +161,114 @@ function registerBot(host, port, callback){
 }
 function takeTurn(){
 
-    var botsMoved = 0;
+    getBotMoves(handleMoves);
 
-    for (var i = 0; i < game.bots.length; i++) {
-        var bot = game.bots[i];
+    function getBotMoves(callback){
+        var movesCollected = 0;
+        var moves = [];
+        for (var i = 0; i < game.bots.length; i++) {
+            var bot = game.bots[i];
 
-        postToBot(bot,"move",game,function(bot, response){
-//            response = {
-//                direction: direction,
-//                mine: Math.floor(Math.random()*2) // 0 || 1
-//            }
-            // todo : check for legal move
-            botsMoved ++;
-
-
-            //clear old position
-            if (response.mine){
-                game.board[bot.position.x][bot.position.y] = "b";
-            }else {
-                game.board[bot.position.x][bot.position.y] = "e";
+            if (!bot.alive) {
+                movesCollected++;
+                moves[bot.id] = undefined;
             }
 
-            bot.position.x += response.direction.x;
-            bot.position.y += response.direction.y;
-
-
-            if (botsMoved == game.bots.length) {
-
-                for (var j = 0; j < game.bots.length; j++) {
-                    var bot = game.bots[j];
-
-
-                    // end of board
-                    if (bot.position.x >= game.board.length || bot.position.x < 0 ||
-                        bot.position.y >= game.board[0].length || bot.position.y < 0){
-                        bot.alive = false;
-                    }
-
-                    // walked in to bomb
-                    else if (game.board[bot.position.x][bot.position.y] == 'b'){
-                        bot.alive = false;
-                    }
-                    else {
-                        for (var k = j + 1; k < game.bots.length; k++) {
-                            var bot2 = game.bots[k];
-                            // samma ruta
-                            if (bot.position.x == bot2.position.x && bot.position.y == bot2.position.y){
-                                bot.alive = false;
-                                bot2.alive = false;
-                            }
-                        }
-                    }
-
-                    //todo:cahnge
-                    if (bot.alive)
-                    {
-                        game.board[bot.position.x][bot.position.y] = bot.id;
-                    }
-
+            postToBot(bot, "move" ,game, function(bot, move) {
+                // validate response
+                if (move.direction && move.direction.x && move.direction.y &&
+                    Math.abs(move.direction.x) + Math.abs(move.direction.y) == 1 &&
+                    move.mine && (move.mine == 1 || move.mine == 0)){
+                    moves.push(undefined);
+                    //todo:message
+                }else {
+                    moves[bot.id] = move;
                 }
 
-                // remove dead bots
-                game.bots = game.bots.filter(function (bot) {
-                    return bot.alive;
-                });
-                
-                game.round++;
-                game.timer--;
-                io.sockets.emit('updateGame', game);
-                console.log("update view");
-//                takeTurn();
-            }
-
-
-        });
-
+                movesCollected ++;
+                if (movesCollected == game.bots.length) {
+                    callback(moves);
+                }
+            });
+        }
     }
 
+    function handleMoves(moves){
+        // update old position on map('b' or 'e') && update bot position.
+        for (var i = 0; i < moves.length; i++) {
+            var move = moves[i];
+            var bot = game.bots[i];
+
+            if (bot.alive){
+
+                // todo: now invalid move kills the bot
+                // validate response
+                if (move == undefined){
+                    // todo: bot feedback
+                    bot.alive = false;
+                    game.board[bot.position.x][bot.position.y] = "e";
+                }
+                else {
+                    bot.position.x += move.direction.x;
+                    bot.position.y += move.direction.y;
+
+                    //clear old position
+                    if (move.mine){
+                        game.board[bot.position.x][bot.position.y] = "b";
+                    }else {
+                        game.board[bot.position.x][bot.position.y] = "e";
+                    }
+                }
+            }
+        }
+
+        // check if someone died and put there new position on the map
+        for (var j = 0; j < game.bots.length; j++) {
+            var bot = game.bots[j];
+
+            // end of board
+            if (bot.position.x >= game.board.length || bot.position.x < 0 ||
+                bot.position.y >= game.board[0].length || bot.position.y < 0){
+                bot.alive = false;
+            }
+
+            // walked in to bomb
+            else if (game.board[bot.position.x][bot.position.y] == 'b'){
+                bot.alive = false;
+            }
+            else {
+                for (var k = j + 1; k < game.bots.length; k++) {
+                    var bot2 = game.bots[k];
+                    // samma ruta
+                    if (bot.position.x == bot2.position.x && bot.position.y == bot2.position.y){
+//                        && bot.alive && bot2.alive){
+                        bot.alive = false;
+                        bot2.alive = false;
+                    }
+                }
+            }
+
+            if (bot.alive)
+            {
+                game.board[bot.position.x][bot.position.y] = bot.id;
+            }
+        }
+
+
+//        //todo: maybe keep them
+//        // remove dead bots
+//        game.bots = game.bots.filter(function (bot) {
+//            return bot.alive;
+//        });
+
+        game.round++;
+        game.timer--;
+        io.sockets.emit('updateGame', game);
+        console.log("update view");
+    }
 }
+
+
 //var exampleBoard =
 //    [
 //        ["e","e","e","b","b","g","e","e","e","b"],

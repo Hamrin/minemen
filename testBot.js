@@ -40,7 +40,8 @@ for (var i = 0; i < 4; i++) {
                     var game = body;
 
                     var direction = {x:0, y:0};
-                    while (direction.x == 0 && direction.y == 0) // we cant stand still
+
+                    while (Math.abs(direction.x) + Math.abs(direction.y) != 1) // we cant stand still
                     {
                         direction.x = Math.floor((Math.random()*3)-1); // -1 || 0 || 1
                         direction.y = Math.floor((Math.random()*3)-1); // -1 || 0 || 1
