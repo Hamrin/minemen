@@ -29,14 +29,14 @@ div#footer {
     position:absolute;
     width:100%;
     bottom:0; /* stick to bottom */
-    background:#2e2e2e;
+
     border-top:2px double #000;
     height: 300px;
 }
 
 textarea#logarea {
-    background-color: #2e2e2e;
-    color: chartreuse;
+    background-color:rgba(50,50,50,0.5);
+    color: #85e400;
     font-family: monospace;
     font-size: 12;
     padding: 1em;
