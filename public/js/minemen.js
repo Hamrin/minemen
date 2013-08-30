@@ -52,5 +52,9 @@ window.onload = function() {
             console.log("There is a problem:", data);
         }
     });
+    socket.on('debug', function (data) {
+        var log = document.getElementById("logarea");
+        log.innerHTML += '\n' + data.log;
+    });
 
 }

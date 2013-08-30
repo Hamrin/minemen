@@ -16,6 +16,36 @@ body {
     color: #777
 }
 
+div#container {
+    position:relative; /* needed for footer positioning*/
+    margin:0 auto; /* center, not in IE5 */
+    width:520px;
+    height:auto !important; /* real browsers */
+    /*height:100%; *//* IE6: treaded as min-height*/
+
+    min-height:100%;  real browsers
+}
+div#footer {
+    position:absolute;
+    width:100%;
+    bottom:0; /* stick to bottom */
+    background:#2e2e2e;
+    border-top:2px double #000;
+    height: 300px;
+}
+
+textarea#logarea {
+    background-color: #2e2e2e;
+    color: chartreuse;
+    font-family: monospace;
+    font-size: 12;
+    padding: 1em;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    resize: none;
+}
+
 .wrapper{
     position: relative;
     float: left;

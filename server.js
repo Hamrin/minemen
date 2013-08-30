@@ -23,6 +23,7 @@ var gameSettings = {
     maxPlayers: 4
 };
 
+var viewSocket;
 
 var viewConnected = false;
 var game = newGame();
@@ -31,19 +32,22 @@ io = io.listen(httpServer);
 io.sockets.on('connection', function(socket){
     console.log('Client Connected');
 
-
+    viewSocket = socket;
     socket.emit('updateGame', game);
+    logToView('updateGame');
 
     // register testBots
     for (var i = 0; i < game.settings.maxPlayers; i++) {
         registerBot("127.0.0.1", 1337 + i, function(){
             console.log("register");
+
             console.log(game.bots.length + ":" + game.settings.maxPlayers);
 
             if (game.bots.length == game.settings.maxPlayers)
                 setInterval(function(){
                     takeTurn();
                     console.log("turn");
+                    logToView('new turn');
                 },2000);
         });
     }
@@ -68,6 +72,7 @@ server.post('/register', function(req, res) {
     console.log('Name: ' + req.body.name);
     console.log('IP: ' + req.body.ip);
     console.log('-------------------');
+    logToView('Bot registered:\n\t ' + 'Name: ' + req.body.name + '\n\tIP: ' + req.body.ip);
     res.send('Bot registered!');
 });
 
@@ -86,7 +91,11 @@ server.get('/', function(req,res){
 //             other stuff               //
 ///////////////////////////////////////////
 
-
+var logToView = function(logMsg) {
+    if(viewSocket != undefined) {
+        viewSocket.emit('debug', {log:logMsg});
+    }
+};
 
 
 var botTemplate = {
