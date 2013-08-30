@@ -3,7 +3,8 @@ body {
     padding: 0px;
     margin: 0px;
     font-size: 90%;
-    background-color: #383838
+    background-color: #383838;
+
 }
 
 .header {
@@ -37,16 +38,17 @@ body {
     float: left;
     margin: 5px 5px 5px 5px;
     border: solid #000 1px;
-    width: 520px;
+    /*width: 520px;*/
     font-size: 12pt;
     vertical-align: middle;
-    color: #777
+    color: #777;
+
 }
 
 div#container {
     position:relative; /* needed for footer positioning*/
     margin:0 auto; /* center, not in IE5 */
-    width:520px;
+    /*width:520px;*/
     height:auto !important; /* real browsers */
     /*height:100%; *//* IE6: treaded as min-height*/
 
@@ -77,10 +79,11 @@ textarea#logarea {
     position: relative;
     float: left;
     left: 0px;
+    clear: left;
     /*width: 260px;*/
     margin-bottom: 1px;
     margin-top: 1px;
-    background-color: #000
+    background-color: #000;
 }
 
 .box,.e,.b,.g,.bot {

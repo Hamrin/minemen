@@ -19,7 +19,8 @@ var httpServer = server.listen(port);
 var gameSettings = {
     botTimeout:"100", //ms
     gameLength:5000, //turns
-    boardSize:{x:10, y:10},
+//    boardSize:{x:50, y:50},
+    boardSize:{x:20, y:20},
     maxPlayers: 4
 };
 
@@ -236,11 +237,11 @@ function takeTurn(){
                     logToView("bot" + bot.id + " died by stepping of the board");
                 }
 
-                // walked in to mine
-                else if (game.board[bot.position.x][bot.position.y] == 'b'){
-                    bot.alive = false;
-                    logToView("bot" + bot.id + " died by walking in to a mine" );
-                }
+                    // walked in to mine
+                    else if (game.board[bot.position.x][bot.position.y] == 'b'){
+                        bot.alive = false;
+                        logToView("bot" + bot.id + " died by walking in to a mine" );
+                    }
                 else {
                     for (var k = j + 1; k < game.bots.length; k++) {
                         var bot2 = game.bots[k];
