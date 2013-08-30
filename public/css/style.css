@@ -6,6 +6,33 @@ body {
     background-color: #383838
 }
 
+.header {
+    float: left;
+    margin: 10px 5px 1px 5px;
+    padding: 0px 0px 0px 0px;
+    border: solid #000 2px;
+    font-family: Verdana, Helvetica, "Comic Sans MS";
+    width: 520px;
+    font-size: 36pt;
+    text-align: center;
+    vertical-align: middle;
+    background-color: #fff;
+    color: #000
+}
+
+.version {
+    float: left;
+    margin: 0px 5px 5px 5px;
+    padding: 0px 5px 0px 0px;
+    border: solid #000 2px;
+    font-family: Verdana, Helvetica, "Comic Sans MS";
+    width: 515px;
+    font-size: 10pt;
+    text-align: right;
+    vertical-align: middle;
+    background-color: #fff
+}
+
 .content {
     float: left;
     margin: 5px 5px 5px 5px;
