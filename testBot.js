@@ -3,10 +3,10 @@ var http = require('http');
 
 var port = 1337;
 var serverHost = "127.0.0.1";
+var players = 15;
 
 
-
-for (var i = 0; i < 4; i++) {
+for (var i = 0; i < players; i++) {
     http.createServer(function (request, res) {
         // handle the routes
         if (request.method == 'POST') {
@@ -20,7 +20,9 @@ for (var i = 0; i < 4; i++) {
 
                 console.log("message received.");
                 console.log(request.url);
-                console.log(body);
+//                console.log(body);
+                body = JSON.parse(body);
+
 
                 var response = {};
 
@@ -54,23 +56,42 @@ function onPing(){
 }
 function onStart(game){
     return {
-        name : "testBot",
+        name : "Jesper testBot",
         version : "0.1"
+//        avatar : "http:/imgurl.png"
     }
 }
 function onMove(game){
 
-    var direction = {x:0, y:0};
+    var direction = undefined;
 
-    while (Math.abs(direction.x) + Math.abs(direction.y) != 1) // we cant stand still
+    myBot = game.bots[game.yourID];
+
+    var directions = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
+    while (
+        direction == undefined || // try a new direction if we have not chosen one yet or..
+        (
+            directions.length != 0  &&  //if we still have another choice and...
+            (
+                myBot.position.x + direction.x >= game.board.length || myBot.position.x + direction.x < 0|| //...or if we will step out of the board (x)
+                myBot.position.y + direction.y >= game.board[0].length || myBot.position.y + direction.y < 0 ||  //...or if we will step out of the board (y)
+                game.board[myBot.position.x + direction.x][myBot.position.y + direction.y] == 'b' //...or if we will step on a mine
+            )
+        )
+        )
     {
-        direction.x = Math.floor((Math.random()*3)-1); // -1 || 0 || 1
-        direction.y = Math.floor((Math.random()*3)-1); // -1 || 0 || 1
+        var pickAtIndex = Math.floor((Math.random() * directions.length));
+        direction = directions.splice(pickAtIndex,1)[0];
+        console.log("tried: " + directions);
+        console.log("tried: " + directions.length);
+        console.log("tried: " + pickAtIndex);
+        console.log("tried: " + direction);
     }
 
+    var layMine = Math.floor(Math.random() * 5 / 4);
     return {
         direction: direction,
-        mine: Math.floor(Math.random()*2) // 0 || 1
+        mine: layMine // 1 || 0
     }
 }
 function onLog(data){

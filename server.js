@@ -216,6 +216,7 @@ function registerBot(host, port, callback){
                 id: game.bots.length,
                 name: response.name,
                 version: response.version,
+                avatar: response.avatar,
                 host: host,
                 port: port,
                 position: position,
