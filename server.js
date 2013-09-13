@@ -137,23 +137,39 @@ server.get('/stop', function(request,response,next){
 
 function startGame(){
     game = newGame();
-    for (var i = 0; i < game.settings.maxPlayers; i++) {
-        registerBot("127.0.0.1", 1337 + i, function(){
-            console.log("register");
-            console.log(game.bots.length + ":" + game.settings.maxPlayers);
 
-            if (game.bots.length == game.settings.maxPlayers)
-                var int = setInterval(function(){
-                    takeTurn();
-                    if(checkAllDead())
-                    {
-                        clearInterval(int);
-                    }
-                    console.log("turn");
-                    logToView('new turn');
+    function start(){
+        var timerId = setInterval(function(){
+                takeTurn();
+                if(checkAllDead())
+                {
+                    clearInterval(timerId);
+                }
+                console.log("turn");
+                logToView('new turn');
 
-                },200);
-        });
+            },200);
+    }
+
+
+    if (game.bots.length > 1)
+    {
+        start();
+    }
+    else
+    {
+        for (var i = 0; i < game.settings.maxPlayers; i++) {
+            registerBot("127.0.0.1", 1337 + i, function(){
+                console.log("register");
+                console.log(game.bots.length + ":" + game.settings.maxPlayers);
+
+                if (game.bots.length == game.settings.maxPlayers)
+                {
+                    start();
+                }
+
+            });
+        }
     }
 }
 
