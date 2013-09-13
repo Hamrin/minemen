@@ -23,7 +23,7 @@ var gameSettings = {
 //    boardSize:{x:50, y:50},
     boardSize:{x:15, y:20},
     maxPlayers: 3,
-    goldFrequency: 10
+    goldFrequency: 5
 };
 
 var viewConnected = false;
@@ -327,6 +327,9 @@ function takeTurn(){
                         }
                     }
                 }
+                if (bot.alive && game.board[bot.position.x][bot.position.y] == 'g'){
+                    bot.points ++;
+                }
 
                 if (bot.alive)
                 {
@@ -357,7 +360,7 @@ function takeTurn(){
             if (emptyTiles.length != 0)
             {
                 // spawn gold!
-                var spawnGoldAt = emptyTiles[Math.round(Math.random() * emptyTiles.length)];
+                var spawnGoldAt = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
                 updateBoard(spawnGoldAt.x, spawnGoldAt.y, "g");
             }
         }
@@ -393,7 +396,6 @@ function newGame() {
     for (var i = 0; i < gameSettings.boardSize.x; i++){
         board[i] = [];
         for (var j = 0; j < gameSettings.boardSize.y; j++){
-//            board[i][j] = types[Math.round(Math.random() * 3)];
             board[i][j] = types[0];
         }
     }
