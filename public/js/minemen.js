@@ -1,3 +1,5 @@
+var socket=null;
+
 function getBotHSLColor(botIndex) {
     var h = parseInt(++botIndex) * 40;
     var s = 100;
@@ -5,14 +7,17 @@ function getBotHSLColor(botIndex) {
     return 'hsl(' + h + '0,' + s + '%,' + l + '%)';
 }
 
+function startGAME(){
+    if(socket){
+        socket.emit("message",{message:"startGAME"});
+    }
+}
+
 window.onload = function() {
     console.log('window on load');
-
-    var socket = io.connect('http://localhost:8081');
+    socket = io.connect('http://localhost:8081');
     var content = document.getElementById("content");
-
     socket.emit("connection",{message:"hello from view"});
-
     socket.on('updateGame', function (data) {
         console.log(data.board.length);
         if(data) {
