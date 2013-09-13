@@ -1,7 +1,8 @@
 //setup Dependencies
 var express = require('express')
     , io = require('socket.io')
-    , http = require('http');
+    , http = require('http')
+    , globalSocket = null;
 
 //Setup Express
 var server = express();
@@ -32,7 +33,7 @@ io = io.listen(httpServer);
 io.sockets.on('connection', function(socket){
 
     console.log('Client Connected');
-
+    globalSocket = socket;
     socket.emit('updateGame', game);
     logToView('updateGame');
 
@@ -186,6 +187,7 @@ function registerBot(host, port, callback){
                 alive: true
             };
             game.bots.push(bot);
+            globalSocket.emit('bots',{message: game.bots});
         }
         callback();
     });

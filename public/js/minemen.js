@@ -13,14 +13,32 @@ function startGAME(){
     }
 }
 
+function onBots(data){
+    var botsBody='';
+    var bots = data.message;
+    for (var i=0; i<bots.length; i++)
+    {
+        if(bots[i].alive)
+        {
+            botsBody += bots[i].name + " [ ALIVE ]<br>";
+        }else{
+            botsBody += bots[i].name + " [ DEAD ]<br>";
+        }
+
+    }
+    document.getElementById('bots').innerHTML = botsBody;
+}
+
 window.onload = function() {
     console.log('window on load');
     socket = io.connect('http://localhost:8081');
     var content = document.getElementById("content");
     socket.emit("connection",{message:"hello from view"});
+    socket.on("bots", onBots);
     socket.on('updateGame', function (data) {
         console.log(data.board.length);
         if(data) {
+            onBots({message: data.bots});
             bots = data.bots;
             content.innerHTML = "";
             for (var i = 0; i < data.board.length; i++) {
