@@ -9,6 +9,7 @@ function getBotHSLColor(botIndex) {
 
 function startGAME(){
     if(socket){
+        document.getElementById("logarea").innerHTML = '';
         socket.emit("message",{message:"startGAME"});
     }
 }
@@ -89,7 +90,8 @@ window.onload = function() {
 
     socket.on('debug', function (data) {
         var log = document.getElementById("logarea");
-        log.innerHTML += '\n' + data.log;
+        var text = log.innerHTML;
+        log.innerHTML = data.log + '\n' + text;
     });
 
 }

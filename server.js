@@ -282,7 +282,7 @@ function takeTurn(){
                     // todo: bot feedback
                     bot.alive = false;
                     updateBoard(bot.position.x, bot.position.y, "e");
-                    logToView("bot" + bot.id + " died by sending an illegal move");
+                    logToView("Bot : " + bot.name + " died by sending an illegal move");
                 }
                 else {
 
@@ -293,7 +293,7 @@ function takeTurn(){
                         updateBoard(bot.position.x, bot.position.y, "e");
                     }
 
-                    logToView("bot" + bot.id + " moves x:" + move.direction.x + ", y: " + move.direction.y);
+                    logToView("Bot : " + bot.name + " moves x:" + move.direction.x + ", y: " + move.direction.y);
                     bot.position.x += move.direction.x;
                     bot.position.y += move.direction.y;
 
@@ -310,13 +310,13 @@ function takeTurn(){
                 if (bot.position.x >= game.board.length || bot.position.x < 0 ||
                     bot.position.y >= game.board[0].length || bot.position.y < 0){
                     bot.alive = false;
-                    logToView("bot" + bot.id + " died by stepping of the board");
+                    logToView("Bot : " + bot.name + " died by stepping of the board");
                 }
 
                 // walked in to mine
                 else if (game.board[bot.position.x][bot.position.y] == 'b'){
                     bot.alive = false;
-                    logToView("bot" + bot.id + " died by walking in to a mine" );
+                    logToView("Bot : " + bot.name + " died by walking in to a mine" );
                 }
                 else {
                     for (var k = j + 1; k < game.bots.length; k++) {
