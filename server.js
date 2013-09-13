@@ -29,18 +29,6 @@ var gameSettings = {
 var viewConnected = false;
 var game = newGame();
 
-var registeredBot1 = {
-    id:0,
-    name:"Kalle the Boter botter",
-    version:"0.1",
-    host:"yourIP.com",
-    port:1337,
-    position:{x:0,y:0},
-    color:0xFF00FF,
-    avatar:'http://qph.is.quoracdn.net/main-thumb-t-320337-50-6cPmQu84LkMbOYDGaRXbK2vP4vV4SnBq.jpeg',
-    points:22
-};
-
 var registeredBot2 = {
     id:0,
     name:"Anna",
@@ -216,40 +204,50 @@ var botTemplate = {
     points:0
 };
 
+function createBot(botData){
 
+    // find position
+    var position = {
+        x:Math.floor((Math.random()* game.settings.boardSize.x)),
+        y:Math.floor((Math.random()* game.settings.boardSize.y))
+    };
+    while (game.board[position.x][position.y] != 'e')
+    {
+        position.x = Math.floor((Math.random()* game.settings.boardSize.x));
+        position.y = Math.floor((Math.random()* game.settings.boardSize.y));
+    }
+    return {
+        id: game.bots.length,
+        name: botData.name,
+        version: botData.version,
+        avatar: botData.avatar,
+        host: botData.host,
+        port: botData.port,
+        position: position,
+        points: 0,
+        alive: true
+    };
+}
 function registerBot(host, port, callback){
-    tmpBot = {host:host, port:port, position:{x:0,y:0}};
+    var tmpBot = {host:host, port:port, position:{x:0,y:0}};
     postToBot(tmpBot, "start", game, function(bot, response){
 //        response = {
 //            name : "testBot",
-//            version : "0.1"
+//            version : "0.1",
+//            avatar : "url"
 //        }
+
 
         if (response.name && response.version) {
 
-            // find position
-            var position = {
-                x:Math.floor((Math.random()* game.settings.boardSize.x)),
-                y:Math.floor((Math.random()* game.settings.boardSize.y))
-            };
-            while (game.board[position.x][position.y] != 'e')
-            {
-                position.x = Math.floor((Math.random()* game.settings.boardSize.x));
-                position.y = Math.floor((Math.random()* game.settings.boardSize.y));
-            }
+            bot.avatar = response.avatar;
+            bot.name = response.name;
+            bot.version = response.version;
 
-            var bot = {
-                id: game.bots.length,
-                name: response.name,
-                version: response.version,
-                avatar: response.avatar,
-                host: host,
-                port: port,
-                position: position,
-                points: 0,
-                alive: true
-            };
-            game.bots.push(bot);
+            var newBot = createBot(bot);
+
+
+            game.bots.push(newBot);
             globalSocket.emit('botRegistered',{message: game});
         }
         callback();
