@@ -63,6 +63,14 @@ div#footer {
     border-top:2px double #000;
     height: 300px;
 }
+div#sider {
+    position:absolute;
+    width:300px;
+    top:0; /* stick to bottom */
+    right:0; /* stick to bottom */
+    border-left:2px double #000;
+    height: 100%;
+}
 
 textarea#logarea {
     background-color:rgba(50,50,50,0.5);
