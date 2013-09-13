@@ -7,38 +7,23 @@ function getBotHSLColor(botIndex) {
     return 'hsl(' + h + '0,' + s + '%,' + l + '%)';
 }
 
-function startGAME(){
+function startGame(){
     if(socket){
         document.getElementById("logarea").innerHTML = '';
-        socket.emit("message",{message:"startGAME"});
+        socket.emit("message",{message:"startGame"});
     }
 }
 
-function onBots(data){
-    var botsBody='';
-    var bots = data.message;
-    for (var i=0; i<bots.length; i++)
-    {
-        if(bots[i].alive)
-        {
-            botsBody += bots[i].name + " [ ALIVE ]<br>";
-        }else{
-            botsBody += bots[i].name + " [ DEAD ]<br>";
-        }
-
-    }
-    document.getElementById('bots').innerHTML = botsBody;
-}
 
 window.onload = function() {
     console.log('window on load');
     socket = io.connect('http://localhost:8081');
     var content = document.getElementById("content");
     socket.emit("connection",{message:"hello from view"});
-    socket.on("bots", onBots);
     socket.on('updateGame', function (data) {
         console.log(data.board.length);
         if(data) {
+            createBotMenu(data.bots);
             onBots({message: data.bots});
             bots = data.bots;
             content.innerHTML = "";
@@ -80,13 +65,43 @@ window.onload = function() {
         }
     });
 
-    socket.on('botRegistered', function (data) {
-        var playersDiv = document.getElementById('players');
-        console.log("playersDiv.children.length: " + playersDiv.children.length);
-        var playerDiv = "<div class='player'><img src='" + (data.avatar) + "' /><div class='score'><img src='gfx/gold_half.gif' />" + data.points + "</div><div class='playerName'>" + data.name + "</div></div>";
 
-        playersDiv.innerHTML += playerDiv;
+
+    function onBots(data){
+        var botsBody='';
+        var bots = data.message;
+        for (var i=0; i<bots.length; i++)
+        {
+            if(bots[i].alive)
+            {
+                botsBody += bots[i].name + " [ ALIVE ]<br>";
+            }else{
+                botsBody += bots[i].name + " [ DEAD ]<br>";
+            }
+
+        }
+        document.getElementById('bots').innerHTML = botsBody;
+    }
+    socket.on('botRegistered', function (data) {
+        createBotMenu(data.bots);
     });
+
+    function createBotMenu(bots)
+    {
+        var playersDiv = document.getElementById('players');
+        var playerDiv;
+        playersDiv.innerHTML = "";
+
+        for (var i = 0; i < bots.length; i++) {
+            var bot = bots[i];
+
+            console.log("playersDiv.children.length: " + playersDiv.children.length);
+            playerDiv = "<div id='players" + bot.id + "' class='player'><img src='" + (bot.avatar) + "' /><div class='score'><img src='gfx/gold_half.gif' />" + bot.points + "</div><div class='playerName'>" + bot.name + "</div></div>";
+            playersDiv.innerHTML += playerDiv;
+        }
+    }
+
+
 
     socket.on('debug', function (data) {
         var log = document.getElementById("logarea");

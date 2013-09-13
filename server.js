@@ -61,10 +61,6 @@ io.sockets.on('connection', function(socket){
     console.log('Client Connected');
     globalSocket = socket;
 
-    socket.emit('botRegistered', registeredBot1);
-
-    socket.emit('botRegistered', registeredBot2);
-
     socket.emit('updateGame', game);
     logToView('updateGame');
 
@@ -97,8 +93,8 @@ io.sockets.on('connection', function(socket){
 
     socket.on('message', function(data){
         console.log('MESSAGE TO START GAME FROM BROWSER')
-        if(data.message == "startGAME"){
-            startGAME();
+        if(data.message == "startGame"){
+            startGame();
         }
     });
     socket.on('disconnect', function(){
@@ -136,7 +132,7 @@ server.get('/stop', function(request,response,next){
     response.end();
 });
 
-function startGAME(){
+function startGame(){
     game = newGame();
     for (var i = 0; i < game.settings.maxPlayers; i++) {
         registerBot("127.0.0.1", 1337 + i, function(){
@@ -220,10 +216,11 @@ function registerBot(host, port, callback){
                 host: host,
                 port: port,
                 position: position,
+                points: 0,
                 alive: true
             };
             game.bots.push(bot);
-            globalSocket.emit('bots',{message: game.bots});
+            globalSocket.emit('botRegistered',{message: game});
         }
         callback();
     });
