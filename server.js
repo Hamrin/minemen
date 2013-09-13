@@ -20,8 +20,8 @@ var gameSettings = {
     botTimeout:"100", //ms
     gameLength:5000, //turns
 //    boardSize:{x:50, y:50},
-    boardSize:{x:20, y:20},
-    maxPlayers: 4
+    boardSize:{x:15, y:20},
+    maxPlayers: 3
 };
 
 var viewConnected = false;
@@ -39,17 +39,15 @@ io.sockets.on('connection', function(socket){
     for (var i = 0; i < game.settings.maxPlayers; i++) {
         registerBot("127.0.0.1", 1337 + i, function(){
             console.log("register");
-
             console.log(game.bots.length + ":" + game.settings.maxPlayers);
 
             if (game.bots.length == game.settings.maxPlayers)
                 setInterval(function(){
                     takeTurn();
-                    console.log(game.board);
                     console.log("turn");
                     logToView('new turn');
 
-                },1000);
+                },200);
         });
     }
 
@@ -156,8 +154,6 @@ function registerBot(host, port, callback){
 }
 function takeTurn(){
 
-    getBotMoves(handleMoves);
-
     function getBotMoves(callback){
         var movesCollected = 0;
         var moves = [];
@@ -169,6 +165,10 @@ function takeTurn(){
                 moves[bot.id] = undefined;
             }
             else {
+
+                // tmp hack todo: change
+                game.yourID = bot.id;
+
                 postToBot(bot, "move" ,game, function(bot, move) {
                     // validate response
                     if (move.direction && move.direction.x && move.direction.y &&
@@ -205,16 +205,16 @@ function takeTurn(){
                 if (move == undefined){
                     // todo: bot feedback
                     bot.alive = false;
-                    game.board[bot.position.x][bot.position.y] = "e";
+                    updateBoard(bot.position.x, bot.position.y, "e");
                     logToView("bot" + bot.id + " died by sending an illegal move");
                 }
                 else {
 
                     //clear old position
                     if (move.mine){
-                        game.board[bot.position.x][bot.position.y] = "b";
+                        updateBoard(bot.position.x, bot.position.y, "b");
                     }else {
-                        game.board[bot.position.x][bot.position.y] = "e";
+                        updateBoard(bot.position.x, bot.position.y, "e");
                     }
 
                     logToView("bot" + bot.id + " moves x:" + move.direction.x + ", y: " + move.direction.y);
@@ -257,23 +257,36 @@ function takeTurn(){
 
                 if (bot.alive)
                 {
-                    game.board[bot.position.x][bot.position.y] = bot.id;
+                    updateBoard(bot.position.x, bot.position.y, bot.id);
+
                 }
             }
         }
-
-
 //        //todo: maybe keep them
 //        // remove dead bots
 //        game.bots = game.bots.filter(function (bot) {
 //            return bot.alive;
 //        });
 
+
+
         game.round++;
         game.timer--;
         io.sockets.emit('updateGame', game);
         console.log("update view");
     }
+
+
+    function updateBoard(x,y,value){
+        game.board[x][y] = value;
+        game.boardUpdates.push({
+            position:{x:x,y:y},
+            value:value
+        });
+    }
+    game.boardUpdates = [];
+    getBotMoves(handleMoves);
+
 }
 
 
