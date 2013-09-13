@@ -1,7 +1,8 @@
 //setup Dependencies
 var express = require('express')
     , io = require('socket.io')
-    , http = require('http');
+    , http = require('http')
+    , globalSocket = null;
 
 //Setup Express
 var server = express();
@@ -29,28 +30,30 @@ var viewConnected = false;
 var game = newGame();
 
 io = io.listen(httpServer);
-io.sockets.on('connection', function(socket){
-    console.log('Client Connected');
 
+io.sockets.on('connection', function(socket){
+
+    console.log('Client Connected');
+    globalSocket = socket;
     socket.emit('updateGame', game);
     logToView('updateGame');
 
-    // register testBots
-    game = newGame();
-    for (var i = 0; i < game.settings.maxPlayers; i++) {
-        registerBot("127.0.0.1", 1337 + i, function(){
-            console.log("register");
-            console.log(game.bots.length + ":" + game.settings.maxPlayers);
-
-            if (game.bots.length == game.settings.maxPlayers)
-                setInterval(function(){
-                    takeTurn();
-                    console.log("turn");
-                    logToView('new turn');
-
-                },200);
-        });
-    }
+//    // register testBots
+//    game = newGame();
+//    for (var i = 0; i < game.settings.maxPlayers; i++) {
+//        registerBot("127.0.0.1", 1337 + i, function(){
+//            console.log("register");
+//            console.log(game.bots.length + ":" + game.settings.maxPlayers);
+//
+//            if (game.bots.length == game.settings.maxPlayers)
+//                setInterval(function(){
+//                    takeTurn();
+//                    console.log("turn");
+//                    logToView('new turn');
+//
+//                },200);
+//        });
+//    }
 
 
 //
@@ -61,6 +64,13 @@ io.sockets.on('connection', function(socket){
 //    socket.on('message', function(data){
 //        socket.broadcast.emit('server_message',data);
 //    });
+
+    socket.on('message', function(data){
+        console.log('MESSAGE TO START GAME FROM BROWSER')
+        if(data.message == "startGAME"){
+            startGAME();
+        }
+    });
     socket.on('disconnect', function(){
       console.log('Client Disconnected.');
     });
@@ -84,6 +94,50 @@ server.get('/', function(req,res){
   res.sendfile(__dirname + '/index.html');
 });
 
+
+///////////////////////////////////////////
+//              Stop Game              //
+//////////////////////////////////////////
+
+server.get('/stop', function(request,response,next){
+    game = null;
+
+    response.writeHead(200);
+    response.end();
+});
+
+function startGAME(){
+    game = newGame();
+    for (var i = 0; i < game.settings.maxPlayers; i++) {
+        registerBot("127.0.0.1", 1337 + i, function(){
+            console.log("register");
+            console.log(game.bots.length + ":" + game.settings.maxPlayers);
+
+            if (game.bots.length == game.settings.maxPlayers)
+                var int = setInterval(function(){
+                    takeTurn();
+                    if(checkAllDead())
+                    {
+                        clearInterval(int);
+                    }
+                    console.log("turn");
+                    logToView('new turn');
+
+                },200);
+        });
+    }
+}
+
+function checkAllDead(){
+    var status = true;
+    for(var i=0; i<game.bots.length; i++){
+        if(game.bots[i].alive)
+        {
+            status = false;
+        }
+    }
+    return status;
+}
 
 ///////////////////////////////////////////
 //             other stuff               //
@@ -149,6 +203,7 @@ function registerBot(host, port, callback){
                 alive: true
             };
             game.bots.push(bot);
+            globalSocket.emit('bots',{message: game.bots});
         }
         callback();
     });
