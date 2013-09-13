@@ -18,7 +18,48 @@ body {
     text-align: center;
     vertical-align: middle;
     background-color: #fff;
-    color: #000
+    color: #000;
+}
+
+img {
+    float: left
+}
+
+.players {
+    clear: left;
+    float: left;
+    margin: 5px 0px 0px 5px;
+    padding: 0px 0px 0px 0px;
+    border: solid #000 2px;
+    width: 162px;
+    height: 778px;
+    background-color: #eee;
+}
+
+.player {
+    clear: left;
+    float: left;
+    margin: 2px 2px 0px 2px;
+    padding: 3px;
+    border: solid #999 1px;
+    font-family: Verdana, Helvetica, "Comic Sans MS";
+    font-weight: bold;
+    width: 150px;
+    font-size: 10pt;
+    text-align: center;
+    vertical-align: bottom;
+    background-color: #fff;
+}
+
+.score {
+    margin: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 0px;
+    font-size: 32pt;
+}
+
+.playerName {
+    clear: left;
+    float: left;
 }
 
 .version {
@@ -32,7 +73,7 @@ body {
     font-size: 10pt;
     text-align: right;
     vertical-align: middle;
-    background-color: #fff
+    background-color: #fff;
 }
 
 .content {
@@ -43,7 +84,6 @@ body {
     font-size: 12pt;
     vertical-align: middle;
     color: #777;
-
 }
 
 div#container {
@@ -112,11 +152,11 @@ textarea#logarea {
 }
 .b{
     background-color: #fff;
-    background-image: url('/gfx/bomb3.png')
+    background-image: url('/gfx/bomb.png');
 }
 .g{
     background-color: #fff;
-    background-image: url('/gfx/gold.gif')
+    background-image: url('/gfx/gold.gif');
 }
 .bot{
     /*background-color: #ccc  */

@@ -78,6 +78,15 @@ window.onload = function() {
             console.log("There is a problem:", data);
         }
     });
+
+    socket.on('botRegistered', function (data) {
+        var playersDiv = document.getElementById('players');
+        console.log("playersDiv.children.length: " + playersDiv.children.length);
+        var playerDiv = "<div class='player'><img src='" + (data.avatar) + "' /><div class='score'><img src='gfx/gold_half.gif' />" + data.points + "</div><div class='playerName'>" + data.name + "</div></div>";
+
+        playersDiv.innerHTML += playerDiv;
+    });
+
     socket.on('debug', function (data) {
         var log = document.getElementById("logarea");
         log.innerHTML += '\n' + data.log;

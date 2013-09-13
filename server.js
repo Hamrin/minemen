@@ -29,12 +29,42 @@ var gameSettings = {
 var viewConnected = false;
 var game = newGame();
 
+var registeredBot1 = {
+    id:0,
+    name:"Kalle the Boter botter",
+    version:"0.1",
+    host:"yourIP.com",
+    port:1337,
+    position:{x:0,y:0},
+    color:0xFF00FF,
+    avatar:'http://qph.is.quoracdn.net/main-thumb-t-320337-50-6cPmQu84LkMbOYDGaRXbK2vP4vV4SnBq.jpeg',
+    points:22
+};
+
+var registeredBot2 = {
+    id:0,
+    name:"Anna",
+    version:"0.1",
+    host:"yourIP.com",
+    port:1337,
+    position:{x:0,y:0},
+    color:0xFF00FF,
+    avatar:'http://qph.is.quoracdn.net/main-thumb-t-320337-50-6cPmQu84LkMbOYDGaRXbK2vP4vV4SnBq.jpeg',
+    points:8
+};
+
 io = io.listen(httpServer);
 
 io.sockets.on('connection', function(socket){
 
+
     console.log('Client Connected');
     globalSocket = socket;
+
+    socket.emit('botRegistered', registeredBot1);
+
+    socket.emit('botRegistered', registeredBot2);
+
     socket.emit('updateGame', game);
     logToView('updateGame');
 
@@ -157,17 +187,6 @@ var botTemplate = {
     position:{x:0,y:0},
     color:0xFF00FF,
     avatar: 'http://qph.is.quoracdn.net/main-thumb-t-320337-50-6cPmQu84LkMbOYDGaRXbK2vP4vV4SnBq.jpeg',
-    points:0
-};
-
-var botExample2 = {
-    id:1,
-    name:"sampleBot2001",
-    host:"yourIP1.com",
-    port:5353,
-    startPosition:{x:1,y:1},
-    color:0xFF00FF,
-    avatar: '',
     points:0
 };
 
