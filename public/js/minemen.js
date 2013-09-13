@@ -83,21 +83,26 @@ window.onload = function() {
         document.getElementById('bots').innerHTML = botsBody;
     }
     socket.on('botRegistered', function (data) {
-        createBotMenu(data.bots);
+        //data = JSON.parse(data.message);
+        createBotMenu(data.message.bots);
     });
 
     function createBotMenu(bots)
     {
-        var playersDiv = document.getElementById('players');
-        var playerDiv;
-        playersDiv.innerHTML = "";
 
-        for (var i = 0; i < bots.length; i++) {
-            var bot = bots[i];
+        if( bots.length > 0 )
+        {
+            var playersDiv = document.getElementById('players');
+            var playerDiv;
+            playersDiv.innerHTML = "";
 
-            console.log("playersDiv.children.length: " + playersDiv.children.length);
-            playerDiv = "<div id='players" + bot.id + "' class='player'><img src='" + (bot.avatar) + "' /><div class='score'><img src='gfx/gold_half.gif' />" + bot.points + "</div><div class='playerName'>" + bot.name + "</div></div>";
-            playersDiv.innerHTML += playerDiv;
+            for (var i = 0; i < bots.length; i++) {
+                var bot = bots[i];
+
+                console.log("playersDiv.children.length: " + playersDiv.children.length);
+                playerDiv = "<div id='players" + bot.id + "' class='player'><img src='" + (bot.avatar) + "' /><div class='score'><img src='gfx/gold_half.gif' />" + bot.points + "</div><div class='playerName'>" + bot.name + "</div></div>";
+                playersDiv.innerHTML += playerDiv;
+            }
         }
     }
 

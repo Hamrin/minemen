@@ -60,6 +60,7 @@ io.sockets.on('connection', function(socket){
 
     console.log('Client Connected');
     globalSocket = socket;
+    game = newGame();
 
     socket.emit('updateGame', game);
     logToView('updateGame');
@@ -136,7 +137,12 @@ server.get('/stop', function(request,response,next){
 });
 
 function startGame(){
-    game = newGame();
+
+    if(checkAllDead())
+    {
+
+        game = newGame();
+    }
 
     function start(){
         var timerId = setInterval(function(){
@@ -175,11 +181,16 @@ function startGame(){
 
 function checkAllDead(){
     var status = true;
-    for(var i=0; i<game.bots.length; i++){
-        if(game.bots[i].alive)
-        {
-            status = false;
+
+    try{
+        for(var i=0; i<game.bots.length; i++){
+            if(game.bots[i].alive)
+            {
+                status = false;
+            }
         }
+    }catch(e){
+        return true;
     }
     return status;
 }
