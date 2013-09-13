@@ -128,8 +128,14 @@ function startGame(){
 
     if(checkAllDead())
     {
+        var newBots = [];
+        for (var i = 0; i < game.bots.length; i++) {
+            var oldBot = game.bots[i]
+            newBots.push(oldBot);
+        }
 
         game = newGame();
+        game.bots = newBots;
     }
 
     function start(){
