@@ -113,14 +113,29 @@ function startGAME(){
             console.log(game.bots.length + ":" + game.settings.maxPlayers);
 
             if (game.bots.length == game.settings.maxPlayers)
-                setInterval(function(){
+                var int = setInterval(function(){
                     takeTurn();
+                    if(checkAllDead())
+                    {
+                        clearInterval(int);
+                    }
                     console.log("turn");
                     logToView('new turn');
 
                 },200);
         });
     }
+}
+
+function checkAllDead(){
+    var status = true;
+    for(var i=0; i<game.bots.length; i++){
+        if(game.bots[i].alive)
+        {
+            status = false;
+        }
+    }
+    return status;
 }
 
 ///////////////////////////////////////////
