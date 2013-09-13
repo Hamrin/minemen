@@ -106,7 +106,10 @@ server.post('/register', function(req, res) {
     console.log('-- Register Bot: --');
     console.log(req.body.name + "@" + req.body.ip + ":" + req.body.port);
     console.log('-------------------');
-    logToView('Bot registered:\n\t ' + req.body.name + "@" + req.body.ip + ":" + req.body.port);
+    logToView('Bot registering:\n\t ' + req.body.name + "@" + req.body.ip + ":" + req.body.port);
+    registerBot(req.body.ip, req.body.port, function(){
+        logToView('Bot has registered:\n\t ' + req.body.name + "@" + req.body.ip + ":" + req.body.port);
+    });
     res.send('Bot registered!');
 });
 
