@@ -10,8 +10,8 @@ server.configure(function(){
     server.use(express.bodyParser());
     server.use(express.cookieParser());
     server.use(express.session({ secret: "shhhhhhhhh!"}));
-    server.use(express.static(__dirname + '/public'));
     server.use(server.router);
+    server.use(express.static(__dirname + '/public'));
 });
 
 
@@ -27,7 +27,7 @@ var gameSettings = {
 };
 
 var viewConnected = false;
-var game = newGame();
+var games = [];
 
 var registeredBot2 = {
     id:0,
@@ -47,44 +47,36 @@ io.sockets.on('connection', function(socket){
 
 
     console.log('Client Connected');
-    globalSocket = socket;
-    game = newGame();
 
-    socket.emit('updateGame', game);
-    logToView('updateGame');
-
-//    // register testBots
-//    game = newGame();
-//    for (var i = 0; i < game.settings.maxPlayers; i++) {
-//        registerBot("127.0.0.1", 1337 + i, function(){
-//            console.log("register");
-//            console.log(game.bots.length + ":" + game.settings.maxPlayers);
-//
-//            if (game.bots.length == game.settings.maxPlayers)
-//                setInterval(function(){
-//                    takeTurn();
-//                    console.log("turn");
-//                    logToView('new turn');
-//
-//                },200);
-//        });
-//    }
-
-
-//
-//    setInterval(function(){
-//        socket.emit('updateGame', game);
-//        console.log("SENDING VIEW"); //TODO: ONLY SENd when turn done
-//    },3000);
-//    socket.on('message', function(data){
-//        socket.broadcast.emit('server_message',data);
-//    });
-
-    socket.on('message', function(data){
-        console.log('MESSAGE TO START GAME FROM BROWSER')
-        if(data.message == "startGame"){
-            startGame();
+    socket.on('init', function(data){
+        console.log('MESSAGE FROM BROWSER: init: ' + data.gameId );
+        if (data.hasOwnProperty("gameId") && data.gameId >= 0 && data.gameId < games.length){
+            socket.join(data.gameId);
+            var game = games[data.gameId];
+            socket.emit('updateGame', game);
+        }else {
+            socket.emit('debug', {log:"game not found: " + data.gameId ? data.gameId : ""});
         }
+    });
+
+
+    socket.on('startGame', function(data){
+        console.log('MESSAGE FROM BROWSER: Start Game');
+
+        if (data.hasOwnProperty("gameId") && data.gameId >= 0 && data.gameId < games.length){
+
+
+            var game = games[data.gameId];
+            io.sockets.in(game.id).emit('updateGame', game);
+            logToView(game, 'updateGame');
+
+            startGame(game);
+        }
+        else{
+            socket.emit('debug', {log:"game not found: " + data.gameId ? data.gameId : ""});
+        }
+
+
     });
     socket.on('disconnect', function(){
       console.log('Client Disconnected.');
@@ -92,12 +84,22 @@ io.sockets.on('connection', function(socket){
 });
 
 server.post('/register', function(req, res) {
+
+    var game;
+    if(req.body.gameId < 0 || req.body.gameId >= games.length){
+        game = games.length - 1;
+    }
+    else {
+        game = games[req.body.gameId];
+    }
+
     console.log('-- Register Bot: --');
-    console.log(req.body.name + "@" + req.body.ip + ":" + req.body.port);
+    console.log(req.body.name + "@" + req.body.ip + ":" + req.body.port + "in game: " + game.id);
     console.log('-------------------');
-    logToView('Bot registering:\n\t ' + req.body.name + "@" + req.body.ip + ":" + req.body.port);
-    registerBot(req.body.ip, req.body.port, function(){
-        logToView('Bot has registered:\n\t ' + req.body.name + "@" + req.body.ip + ":" + req.body.port);
+
+    logToView(game, 'Bot registering:\n\t ' + req.body.name + "@" + req.body.ip + ":" + req.body.port);
+    registerBot(game, req.body.ip, req.body.port, function(){
+        logToView(game, 'Bot has registered:\n\t ' + req.body.name + "@" + req.body.ip + ":" + req.body.port);
     });
     res.send('Bot registered!');
 });
@@ -108,8 +110,23 @@ server.post('/register', function(req, res) {
 
 /////// ADD ALL YOUR ROUTES HERE  /////////
 
-server.get('/', function(req,res){
-  res.sendfile(__dirname + '/index.html');
+server.get('/', function(req, res){
+    return res.redirect('/game/');
+});
+
+server.get('/game/', function(req,res){
+        var game = newGame();
+        return res.redirect('/game/'+ game.id);
+});
+server.get('/game/:id', function(req,res){
+    if(games.length <= req.params.id || req.params.id < 0) {
+        var game = newGame();
+        return res.redirect('/game/'+ game.id);
+//        res.statusCode = 404;
+//        return res.send('Error 404: No game found');
+    }
+
+    return res.sendfile(__dirname + '/public/index.html');
 });
 
 
@@ -124,29 +141,31 @@ server.get('/stop', function(request,response,next){
     response.end();
 });
 
-function startGame(){
+function startGame(game){
+    console.log("Start game: " + game.id);
 
-    if(checkAllDead())
-    {
-        var newBots = [];
-        for (var i = 0; i < game.bots.length; i++) {
-            var oldBot = game.bots[i]
-            newBots.push(oldBot);
-        }
-
-        game = newGame();
-        game.bots = newBots;
-    }
+//    if(checkAllDead(game))
+//    {
+//        var newBots = [];
+//        for (var i = 0; i < game.bots.length; i++) {
+//            var oldBot = game.bots[i]
+//            newBots.push(oldBot);
+//        }
+//
+//        game = newGame();
+//        game.bots = newBots;
+//    }
 
     function start(){
         var timerId = setInterval(function(){
-                takeTurn();
-                if(checkAllDead())
+                takeTurn(game);
+                if(checkAllDead(game))
                 {
+                    console.log("Game ended");
                     clearInterval(timerId);
                 }
                 console.log("turn");
-                logToView('new turn');
+                logToView(game, 'new turn');
 
             },200);
     }
@@ -159,7 +178,7 @@ function startGame(){
     else
     {
         for (var i = 0; i < game.settings.maxPlayers; i++) {
-            registerBot("127.0.0.1", 1337 + i, function(){
+            registerBot(game, "127.0.0.1", 1337 + i, function(){
                 console.log("register");
                 console.log(game.bots.length + ":" + game.settings.maxPlayers);
 
@@ -173,7 +192,7 @@ function startGame(){
     }
 }
 
-function checkAllDead(){
+function checkAllDead(game){
     var status = true;
 
     try{
@@ -193,8 +212,8 @@ function checkAllDead(){
 //             other stuff               //
 ///////////////////////////////////////////
 
-var logToView = function(logMsg) {
-    io.sockets.emit('debug', {log:logMsg});
+var logToView = function(game, logMsg) {
+    io.sockets.in(game.id).emit('debug', {log:logMsg});
 };
 
 
@@ -210,7 +229,7 @@ var botTemplate = {
     points:0
 };
 
-function createBot(botData){
+function createBot(game, botData){
 
     // find position
     var position = {
@@ -234,7 +253,7 @@ function createBot(botData){
         alive: true
     };
 }
-function registerBot(host, port, callback){
+function registerBot(game, host, port, callback){
     var tmpBot = {host:host, port:port, position:{x:0,y:0}};
     postToBot(tmpBot, "start", game, function(bot, response){
 //        response = {
@@ -250,16 +269,16 @@ function registerBot(host, port, callback){
             bot.name = response.name;
             bot.version = response.version;
 
-            var newBot = createBot(bot);
+            var newBot = createBot(game, bot);
 
 
             game.bots.push(newBot);
-            globalSocket.emit('botRegistered',{message: game});
+            io.sockets.in(game.id).emit('botRegistered',{message: game});
         }
         callback();
     });
 }
-function takeTurn(){
+function takeTurn(game){
 
     function getBotMoves(callback){
         var movesCollected = 0;
@@ -313,7 +332,7 @@ function takeTurn(){
                     // todo: bot feedback
                     bot.alive = false;
                     updateBoard(bot.position.x, bot.position.y, "e");
-                    logToView("Bot : " + bot.name + " died by sending an illegal move");
+                    logToView(game, "Bot : " + bot.name + " died by sending an illegal move");
                 }
                 else {
 
@@ -324,7 +343,7 @@ function takeTurn(){
                         updateBoard(bot.position.x, bot.position.y, "e");
                     }
 
-                    logToView("Bot : " + bot.name + " moves x:" + move.direction.x + ", y: " + move.direction.y);
+                    logToView(game, "Bot : " + bot.name + " moves x:" + move.direction.x + ", y: " + move.direction.y);
                     bot.position.x += move.direction.x;
                     bot.position.y += move.direction.y;
 
@@ -341,13 +360,13 @@ function takeTurn(){
                 if (bot.position.x >= game.board.length || bot.position.x < 0 ||
                     bot.position.y >= game.board[0].length || bot.position.y < 0){
                     bot.alive = false;
-                    logToView("Bot : " + bot.name + " died by stepping of the board");
+                    logToView(game, "Bot : " + bot.name + " died by stepping of the board");
                 }
 
                 // walked in to mine
                 else if (game.board[bot.position.x][bot.position.y] == 'b'){
                     bot.alive = false;
-                    logToView("Bot : " + bot.name + " died by walking in to a mine" );
+                    logToView(game, "Bot : " + bot.name + " died by walking in to a mine" );
                 }
                 else {
                     for (var k = j + 1; k < game.bots.length; k++) {
@@ -357,7 +376,7 @@ function takeTurn(){
     //                        && bot.alive && bot2.alive){
                             bot.alive = false;
                             bot2.alive = false;
-                            logToView("bot" + bot.id + "and bot" + bot2.id + " died by walking in to a each other");
+                            logToView(game, "bot" + bot.id + "and bot" + bot2.id + " died by walking in to a each other");
                         }
                     }
                 }
@@ -401,7 +420,7 @@ function takeTurn(){
 
         game.round++;
         game.timer--;
-        io.sockets.emit('updateGame', game);
+        io.sockets.in(game.id).emit('updateGame', game);
         console.log("update view");
     }
 
@@ -433,13 +452,17 @@ function newGame() {
             board[i][j] = types[0];
         }
     }
-    return {
+
+    var game = {
+        id: games.length,
         round : 0,
         bots: [],
         timer: gameSettings.gameLength,
         board: board,
         settings: gameSettings
     };
+    games.push(game);
+    return game;
 }
 
 /**

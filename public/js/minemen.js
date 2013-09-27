@@ -7,10 +7,12 @@ function getBotHSLColor(botIndex) {
     return 'hsl(' + h + '0,' + s + '%,' + l + '%)';
 }
 
+var gameId = window.location.pathname.split("/").pop();
+
 function startGame(){
     if(socket){
         document.getElementById("logarea").innerHTML = '';
-        socket.emit("message",{message:"startGame"});
+        socket.emit("startGame",{gameId:gameId});
     }
 }
 
@@ -19,10 +21,11 @@ window.onload = function() {
     console.log('window on load');
     socket = io.connect('http://localhost:8081');
     var content = document.getElementById("content");
-    socket.emit("connection",{message:"hello from view"});
+    socket.emit("init",{gameId:gameId});
     socket.on('updateGame', function (data) {
         console.log(data.board.length);
         if(data) {
+            gameId = data.id;
             createBotMenu(data.bots);
             onBots({message: data.bots});
             bots = data.bots;
@@ -100,7 +103,7 @@ window.onload = function() {
                 var bot = bots[i];
 
                 console.log("playersDiv.children.length: " + playersDiv.children.length);
-                playerDiv = "<div id='players" + bot.id + "' class='player'><img src='" + (bot.avatar) + "' /><div class='score'><img src='gfx/gold_half.gif' />" + bot.points + "</div><div class='playerName'>" + bot.name + "</div></div>";
+                playerDiv = "<div id='players" + bot.id + "' class='player'><img src='" + (bot.avatar) + "' /><div class='score'><img src='/gfx/gold_half.gif' />" + bot.points + "</div><div class='playerName'>" + bot.name + "</div></div>";
                 playersDiv.innerHTML += playerDiv;
             }
         }
