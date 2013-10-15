@@ -18,15 +18,17 @@ server.configure(function(){
 var port = 8081;
 var httpServer = server.listen(port);
 var gameSettings = {
-    botTimeout:"100", //ms
-    gameLength:5000, //turns
+    turnDuration:200, //ms (needs to be a bit higher than bot timeout!)
+    botTimeout:2000, //ms
+    gameLength:500, //turns
 //    boardSize:{x:50, y:50},
+//    boardSize:{x:10, y:10},
     boardSize:{x:15, y:20},
     maxPlayers: 3,
     goldFrequency: 5
+
 };
 
-var viewConnected = false;
 var games = [];
 
 var registeredBot2 = {
@@ -75,9 +77,22 @@ io.sockets.on('connection', function(socket){
         else{
             socket.emit('debug', {log:"game not found: " + data.gameId ? data.gameId : ""});
         }
-
-
     });
+
+    socket.on('addTestBot', function(data){
+        if (data.hasOwnProperty("gameId") && data.gameId >= 0 && data.gameId < games.length){
+            var game = games[data.gameId];
+            registerBot(game, "127.0.0.1", 1337, function(){
+                console.log("register");
+                console.log(game.bots.length + ":" + game.settings.maxPlayers);
+
+            });
+        }
+        else{
+            socket.emit('debug', {log:"game not found: " + data.gameId ? data.gameId : ""});
+        }
+    });
+
     socket.on('disconnect', function(){
       console.log('Client Disconnected.');
     });
@@ -157,38 +172,46 @@ function startGame(game){
 //    }
 
     function start(){
-        var timerId = setInterval(function(){
-                takeTurn(game);
-                if(checkAllDead(game))
+
+        var nextTurn = function(){
+
+            var turnDone = false;
+            var turnReady = false;
+
+            var afterTurn = function(){
+                if(checkAllDead(game) || game.round == game.settings.gameLength)
                 {
                     console.log("Game ended");
-                    clearInterval(timerId);
+                }else {
+                    console.log("turn");
+                    logToView(game, 'new turn');
+                    nextTurn();
                 }
-                console.log("turn");
-                logToView(game, 'new turn');
+            };
 
-            },200);
+            setTimeout(function(){
+                turnDone = true;
+                if (turnReady){
+                    afterTurn();
+                }
+            }, game.settings.turnDuration);
+
+            takeTurn(game, function() {
+                turnReady = true;
+                if (turnDone){
+                    afterTurn()
+                }
+            });
+
+        };
+        nextTurn();
+
     }
 
 
     if (game.bots.length > 1)
     {
         start();
-    }
-    else
-    {
-        for (var i = 0; i < game.settings.maxPlayers; i++) {
-            registerBot(game, "127.0.0.1", 1337 + i, function(){
-                console.log("register");
-                console.log(game.bots.length + ":" + game.settings.maxPlayers);
-
-                if (game.bots.length == game.settings.maxPlayers)
-                {
-                    start();
-                }
-
-            });
-        }
     }
 }
 
@@ -278,7 +301,7 @@ function registerBot(game, host, port, callback){
         callback();
     });
 }
-function takeTurn(game){
+function takeTurn(game, callback){
 
     function getBotMoves(callback){
         var movesCollected = 0;
@@ -295,12 +318,35 @@ function takeTurn(game){
                 // tmp hack todo: change
                 game.yourID = bot.id;
 
+
+                var turnEnded = false;
+                setTimeout(function(){
+                    if (!turnEnded){
+                        turnEnded = true;
+
+                        var playersTimedOut = [];
+                        for (var j = 0; j < game.bots.length; j++) {
+                            if (moves[j] == undefined && game.bots[j].alive)
+                            {
+                                game.bots[j].alive = false;
+                                playersTimedOut.push(j);
+                            }
+                        }
+                        logToView(game,"some bots didn't respond in time: " + playersTimedOut.toString());
+                        callback();
+
+                    }
+                }, game.settings.botTimeout);
+
                 postToBot(bot, "move" ,game, function(bot, move) {
+                    if (turnEnded){
+                        return;
+                    }
                     // validate response
                     if (move.direction && move.direction.x && move.direction.y &&
                         Math.abs(move.direction.x) + Math.abs(move.direction.y) == 1 &&
                         move.mine && (move.mine == 1 || move.mine == 0)){
-                        moves.push(undefined);
+                        moves[bot.id] = undefined;
                         //todo:message
                     }else {
                         moves[bot.id] = move;
@@ -308,6 +354,7 @@ function takeTurn(game){
 
                     movesCollected ++;
                     if (movesCollected == game.bots.length) {
+                        turnEnded = true;
                         callback(moves);
                     }
                 });
@@ -343,7 +390,7 @@ function takeTurn(game){
                         updateBoard(bot.position.x, bot.position.y, "e");
                     }
 
-                    logToView(game, "Bot : " + bot.name + " moves x:" + move.direction.x + ", y: " + move.direction.y);
+//                    logToView(game, "Bot : " + bot.name + " moves x:" + move.direction.x + ", y: " + move.direction.y);
                     bot.position.x += move.direction.x;
                     bot.position.y += move.direction.y;
 
@@ -372,7 +419,7 @@ function takeTurn(game){
                     for (var k = j + 1; k < game.bots.length; k++) {
                         var bot2 = game.bots[k];
                         // samma ruta
-                        if (bot.position.x == bot2.position.x && bot.position.y == bot2.position.y){
+                        if (bot.position.x == bot2.position.x && bot.position.y == bot2.position.y && bot.alive && bot2.alive){
     //                        && bot.alive && bot2.alive){
                             bot.alive = false;
                             bot2.alive = false;
@@ -433,7 +480,10 @@ function takeTurn(game){
         });
     }
     game.boardUpdates = [];
-    getBotMoves(handleMoves);
+    getBotMoves(function(moves){
+        handleMoves(moves);
+        callback();
+    });
 
 }
 
@@ -469,7 +519,6 @@ function newGame() {
  * to post messages to bots
  * usage:
  * postToBot("127.0.0.1",1337,"ping",{data:"cool data"}, function(response){});
- * todo:timeout
  */
 
 function postToBot(bot, message, data, callback) {

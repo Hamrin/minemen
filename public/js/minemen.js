@@ -11,11 +11,19 @@ var gameId = window.location.pathname.split("/").pop();
 
 function startGame(){
     if(socket){
-        document.getElementById("logarea").innerHTML = '';
-        socket.emit("startGame",{gameId:gameId});
+        if (game.round == 0){
+            document.getElementById("logarea").innerHTML = '';
+            socket.emit("startGame",{gameId:gameId});
+        }
+    }
+}
+function addTestBot(){
+    if(socket){
+        socket.emit("addTestBot",{gameId:gameId});
     }
 }
 
+var game = null;
 
 window.onload = function() {
     console.log('window on load');
@@ -25,10 +33,16 @@ window.onload = function() {
     socket.on('updateGame', function (data) {
         console.log(data.board.length);
         if(data) {
+
+            game = data;
             gameId = data.id;
             createBotMenu(data.bots);
             onBots({message: data.bots});
             bots = data.bots;
+
+            var round = document.getElementById("round");
+            round.innerHTML = data.round + " of " + data.settings.gameLength
+
             content.innerHTML = "";
             for (var i = 0; i < data.board.length; i++) {
 //                    console.log(data.board[i]);
@@ -103,7 +117,7 @@ window.onload = function() {
                 var bot = bots[i];
 
                 console.log("playersDiv.children.length: " + playersDiv.children.length);
-                playerDiv = "<div id='players" + bot.id + "' class='player'><img src='" + (bot.avatar) + "' /><div class='score'><img src='/gfx/gold_half.gif' />" + bot.points + "</div><div class='playerName'>" + bot.name + "</div></div>";
+                playerDiv = "<div id='players" + bot.id + "' class='player" + (bot.alive ? "" : " dead") + "'><img src='" + (bot.avatar) + "' /><div class='score'><img src='/gfx/gold_half.gif' />" + bot.points + "</div><div class='playerName'>" + bot.name + "</div></div>";
                 playersDiv.innerHTML += playerDiv;
             }
         }

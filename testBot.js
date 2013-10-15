@@ -57,7 +57,8 @@ function onPing(){
 function onStart(game){
     return {
         name : "Jesper testBot",
-        version : "0.1"
+        version : "0.1",
+        avatar : "http://a.deviantart.net/avatars/d/r/dr-robot.png?1"
 //        avatar : "http:/imgurl.png"
     }
 }

@@ -11,14 +11,13 @@ body {
     float: left;
     margin: 10px 5px 1px 5px;
     padding: 0px 0px 0px 0px;
-    border: solid #000 2px;
     font-family: Verdana, Helvetica, "Comic Sans MS";
     width: 99%;
     font-size: 36pt;
     text-align: center;
     vertical-align: middle;
-    background-color: #fff;
-    color: #000;
+    background-color: #383838;
+    color: #ffffff;
 }
 
 img {
@@ -60,20 +59,6 @@ img {
 .playerName {
     clear: left;
     float: left;
-}
-
-.version {
-    clear: left;
-    float: left;
-    margin: 0px 5px 5px 5px;
-    padding: 0px 1% 0px 0px;
-    border: solid #000 2px;
-    font-family: Verdana, Helvetica, "Comic Sans MS";
-    width: 98%;
-    font-size: 10pt;
-    text-align: right;
-    vertical-align: middle;
-    background-color: #fff;
 }
 
 .content {
@@ -160,4 +145,10 @@ textarea#logarea {
 }
 .bot{
     /*background-color: #ccc  */
+}
+a:link, a:visited  {color:#ffffff;}
+
+.dead{
+    color: #DD0000;
+    /*background-color: #550000;*/
 }
