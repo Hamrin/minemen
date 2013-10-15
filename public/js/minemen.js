@@ -27,7 +27,7 @@ var game = null;
 
 window.onload = function() {
     console.log('window on load');
-    socket = io.connect('http://localhost:8081');
+    socket = io.connect("http://" + document.location.hostname + ":" + document.location.port);
     var content = document.getElementById("content");
     socket.emit("init",{gameId:gameId});
     socket.on('updateGame', function (data) {
