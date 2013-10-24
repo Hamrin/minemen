@@ -576,6 +576,7 @@ function postToBot(bot, message, data, callback) {
 
     request.on('error', function(e) {
         console.log('problem with request: ' + e.message);
+        console.log('problem with request: ' +  JSON.stringify(options));
     });
 
     // write data to request body
