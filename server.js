@@ -365,6 +365,9 @@ function takeTurn(game, callback){
 
 
     function handleMoves(moves){
+        if (moves == undefined){
+            moves = [];
+        }
 
         // update old position on map('b' or 'e') && update bot position.
         for (var i = 0; i < moves.length; i++) {
