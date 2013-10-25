@@ -11,24 +11,25 @@ MineMen Goals:
 
 
 To start a project:
-		
-		git clone https://github.com/Hamrin/minemen.git
-		cd minemen
+        
+    git clone https://github.com/Hamrin/minemen.git
+    cd minemen
 
 This will copy down all of the files, organize them appropriately and init a fresh new git repository within which you can build your next big thing.
 
 Install required dependencies (express and socket.io):
-        cd minemen
-        npm install
+
+    cd minemen
+    npm install
 
 To run the MineMen app:
 
-		node server.js
+    node server.js
 
 If successfully able to run the server you will get the port number. i.e: 8081
 
 Go to :
 
-        http://localhost:8081
+    http://localhost:8081
 
 and you will see the GUI for the game.
