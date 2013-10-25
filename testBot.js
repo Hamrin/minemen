@@ -15,7 +15,7 @@ your bot need to respond to the following Json post calls:
         {
             name : "Your bot name",
             version : "0.1",
-            avatar : "http://yourBotImageUrl30x30px.png"
+            avatar : "http://yourBotImageUrl50x50px.png"
         }
 
     on "http://yourIp:yourPort/move" you should return yor move in json
@@ -91,7 +91,7 @@ your bot need to respond to the following Json post calls:
                 "turnDuration": 200,
                 "botTimeout": 2000, // if the game server don't have the response in 2000ms yor bot will die
                 "gameLength": 500, // maximum turns before the game ends
-                "boardSize": { "x": 15, "y": 20},
+                "boardSize": { "x": 10, "y": 10},
                 "goldFrequency": 5 // how often gold spawn
          },
         "boardUpdates": [],
