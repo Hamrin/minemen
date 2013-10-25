@@ -525,7 +525,10 @@ function postToBot(bot, message, data, callback) {
         hostname: bot.host,
         port: bot.port,
         path: '/' + message,
-        method: 'POST'
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        }
     };
 
     var request = http.request(options, function(response) {
