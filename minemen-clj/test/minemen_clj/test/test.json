@@ -1,0 +1,55 @@
+{
+    "id": 0,
+    "round": 60,
+    "bots": [
+        {
+            "id": 0,
+            "name": "Jesper testBot",
+            "version": "0.1",
+            "avatar": "http://a.deviantart.net/avatars/d/r/dr-robot.png?1",
+            "host": "127.0.0.1",
+            "port": 1337,
+            "position": {
+                "x": 5,
+                "y": 7
+            },
+            "points": 0,
+            "alive": true
+        },
+        {
+            "id": 1,
+            "name": "Jesper testBot",
+            "version": "0.1",
+            "avatar": "http://a.deviantart.net/avatars/d/r/dr-robot.png?1",
+            "host": "127.0.0.1",
+            "port": 1337,
+            "position": {
+                "x": 7,
+                "y": 7
+            },
+            "points": 0,
+            "alive": true
+        }],
+    "timer": 440,
+    "board": [
+        ["e","e","e","e","e","e","g","e","e","e"],
+        ["b","g","g","e","e","e","e","e","e","e"],
+        ["e","b","e","e","e","e","e","e","e","e"],
+        ["b","e","b","b","b","e","e","e","e","e"],
+        ["b","e","b","b","e","b","b","e","e","e"],
+        ["e","e","b","e","e","e","e", 0 ,"e","e"],
+        ["b","e","e","e","e","e","e","g","e","e"],
+        ["e","e","g","e","e","e","e", 1 ,"e","e"],
+        ["b","e","e","e","e","e","b","b","e","e"],
+        ["b","e","e","e","e","e","b","b","e","e"],
+        ["e","e","e","e","e","e","e","e","e","e"]],
+    "settings":{
+        "turnDuration": 200,
+        "botTimeout": 2000,
+        "gameLength": 500,
+        "boardSize": { "x": 15, "y": 20},
+        "goldFrequency": 5
+    },
+    "boardUpdates": [],
+    "yourID": 1
+}
