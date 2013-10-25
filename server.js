@@ -363,37 +363,30 @@ function takeTurn(game, callback){
         }
     }
 
+
     function handleMoves(moves){
+
         // update old position on map('b' or 'e') && update bot position.
         for (var i = 0; i < moves.length; i++) {
-            var move = moves[i];
             var bot = game.bots[i];
 
             if (bot.alive){
-
-                console.log("move: " + i);
-
-                // todo: now invalid move kills the bot
-                // validate response
-                if (move == undefined){
-                    // todo: bot feedback
-                    bot.alive = false;
-                    updateBoard(bot.position.x, bot.position.y, "e");
-                    logToView(game, "Bot : " + bot.name + " died by sending an illegal move");
-                }
-                else {
-
+                try {
+                    var move = moves[i];
+                    console.log("move: " + i);
                     //clear old position
                     if (move.mine){
                         updateBoard(bot.position.x, bot.position.y, "b");
                     }else {
                         updateBoard(bot.position.x, bot.position.y, "e");
                     }
-
-//                    logToView(game, "Bot : " + bot.name + " moves x:" + move.direction.x + ", y: " + move.direction.y);
+                    //                    logToView(game, "Bot : " + bot.name + " moves x:" + move.direction.x + ", y: " + move.direction.y);
                     bot.position.x += move.direction.x;
                     bot.position.y += move.direction.y;
-
+                } catch(err) {
+                    bot.alive = false;
+                    updateBoard(bot.position.x, bot.position.y, "e");
+                    logToView(game, "Bot : " + bot.name + " died by sending an illegal move, caused: " + err);
                 }
             }
         }
