@@ -30,4 +30,9 @@
       (is (seq-contains? [3 3] mines))
       (is (seq-contains? [4 3] mines))
       (is (seq-contains? [2 5] mines))
-      (is (seq-contains? [6 9] mines)))))
+      (is (seq-contains? [6 9] mines))))
+
+  (testing "find bots"
+    (let [bots (find-bots state)]
+      (is (= 1 (count bots)))
+      (is (seq-contains? [7 5] bots)))))
