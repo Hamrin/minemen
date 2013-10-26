@@ -14,13 +14,13 @@
 (defn loc
   "returns this bot's location on the board as [x y]"
   [state]
-  (first (filter #(> (first %) -1) (map #(vector (.indexOf (last %) (id state)) (first %)) (indexed-board state)))))
+  (first (filter #(> (last %) -1) (map #(vector (first %) (.indexOf (last %) (id state))) (indexed-board state)))))
 
 (defn size
   "returns size of board as [x y]"
   [state]
   (let [board (state "board")]
-    [(count (nth board 1)) (count board)]))
+    [(count board) (count (first board))]))
 
 (defn seq-contains?
   "tests if value v exists in seq s"
@@ -35,7 +35,7 @@
 (defn find-in-row
   "returns the locations of value matching predicate p in in row i as a vector of [x y] positions"
   [i p row]
-  (map #(vector % i) (indexes-of p row)))
+  (map #(vector i %) (indexes-of p row)))
 
 (defn find-on-board
   "returns the locations of values matching predicate p as a vector of [y x] positions"
@@ -47,19 +47,38 @@
   [state]
   (find-on-board state #{"g"}))
 
-(defn find-mines
-  "returns the location of mines as a vector of [y x] positions"
+(defn find-bombs
+  "returns the location of bombs as a vector of [y x] positions"
   [state]
   (find-on-board state #{"b"}))
 
 (defn find-bots
-  "returns the location of mines as a vector of [y x] positions"
+  "returns the location of bombs as a vector of [y x] positions"
   [state]
   (find-on-board state #(and (integer? %) (not (= (id state) %)))))
 
 (defn new-loc [state move]
   (let [cur-loc (loc state)] [(+ (first cur-loc) (first move)) (+ (last cur-loc) (last move))]))
 
-(defn move [board]
-  (println board)
-  {:direction {:x 0, :y 0}, :mine 0})
+(defn in-bounds [len i] (and (>= i 0) (< i len)))
+
+(defn in-bounds [state pos]
+  (let [sx (first (size state))
+        sy (last (size state))
+        px (first pos)
+        py (last pos)]
+    (and (and (>= px 0) (< px sx))
+         (and (>= py 0) (< py sy)))))
+
+(defn remove-bad-candidates [state candidates]
+  (let [board-size (size state)
+        moves (zipmap candidates (map #(new-loc state %) candidates))]
+    (map first (filter #(in-bounds state (last %)) moves))))
+
+(defn move-candidates []
+  [[1 0] [-1 0] [0 1] [0 -1]])
+
+(defn move [state]
+  (let [candidates (remove-bad-candidates state (move-candidates))
+        best-move (first candidates)]
+    {:direction {:x (first best-move), :y (last best-move)}, :bomb 0}))

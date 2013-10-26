@@ -3,39 +3,49 @@
             [clojure.test :refer :all]
             [clojure.data.json :as json]))
 
-(def state (json/read-str (slurp "test/minemen_clj/test/test.json")))
-
 (deftest test-board
-  (testing "coordinates returned when bot found"
-    (is (= [7 7] (loc state))))
+  (testing "location"
+    (is (= [0 0] (loc {"board" [[ 0  "e"] ["e" "e"]], "yourID" 0})))
+    (is (= [0 1] (loc {"board" [["e"  0 ] ["e" "e"]], "yourID" 0})))
+    (is (= [1 0] (loc {"board" [["e" "e"] [ 0  "e"]], "yourID" 0})))
+    (is (= [1 1] (loc {"board" [["e" "e"] ["e"  0 ]], "yourID" 0}))))
 
   (testing "size of board"
-    (is (= [10 11] (size state))))
+    (is (= [0 0] (size {"board" []})))
+    (is (= [1 1] (size {"board" [["e"]]})))
+    (is (= [1 2] (size {"board" [["e" "e"]]})))
+    (is (= [2 1] (size {"board" [["e"] ["e"]]}))))
 
   (testing "find gold"
-    (let [gold (find-gold state)]
-      (is (= 5 (count gold)))
-      (is (seq-contains? [6 0] gold))
-      (is (seq-contains? [1 1] gold))
-      (is (seq-contains? [2 1] gold))
-      (is (seq-contains? [7 6] gold))
-      (is (seq-contains? [2 7] gold))))
+    (let [gold (find-gold {"yourID" 0
+                           "board" [[ 1  "g" "g"]
+                                    ["e"  0  "g"]
+                                    ["e" "b" "b"]]})]
+      (is (= 3 (count gold)))
+      (is (seq-contains? [0 1] gold))
+      (is (seq-contains? [0 2] gold))
+      (is (seq-contains? [1 2] gold))))
 
-  (testing "find mines"
-    (let [mines (find-mines state)]
-      (is (= 19 (count mines)))
-      (is (seq-contains? [0 1] mines))
-      (is (seq-contains? [0 3] mines))
-      (is (seq-contains? [2 3] mines))
-      (is (seq-contains? [3 3] mines))
-      (is (seq-contains? [4 3] mines))
-      (is (seq-contains? [2 5] mines))
-      (is (seq-contains? [6 9] mines))))
+  (testing "find bombs"
+    (let [bombs (find-bombs {"yourID" 0
+                             "board" [["b" "e" "g"]
+                                      [ 1   0  "g"]
+                                      ["b" "b" "b"]]})]
+      (is (= 4 (count bombs)))
+      (is (seq-contains? [0 0] bombs))
+      (is (seq-contains? [2 0] bombs))
+      (is (seq-contains? [2 1] bombs))
+      (is (seq-contains? [2 2] bombs))))
 
   (testing "find bots"
-    (let [bots (find-bots state)]
-      (is (= 1 (count bots)))
-      (is (seq-contains? [7 5] bots))))
+    (let [bots (find-bots {"yourID" 0
+                           "board" [["b" "e"  1 ]
+                                    ["e"  0  "g"]
+                                    ["b"  2   3 ]]})]
+      (is (= 3 (count bots)))
+      (is (seq-contains? [0 2] bots))
+      (is (seq-contains? [2 1] bots))
+      (is (seq-contains? [2 2] bots))))
 
   (testing "new location"
     (let [state {"yourID" 0
