@@ -12,15 +12,15 @@
   (zipmap (range) (state "board")))
 
 (defn loc
-  "returns this bot's location on the board as [y x]"
+  "returns this bot's location on the board as [x y]"
   [state]
-  (first (filter #(> (last %) -1) (map #(vector (first %) (.indexOf (last %) (id state))) (indexed-board state)))))
+  (first (filter #(> (first %) -1) (map #(vector (.indexOf (last %) (id state)) (first %)) (indexed-board state)))))
 
 (defn size
-  "returns size of board as [y x]"
+  "returns size of board as [x y]"
   [state]
   (let [board (state "board")]
-    [(count board) (count (nth board 1))]))
+    [(count (nth board 1)) (count board)]))
 
 (defn seq-contains?
   "tests if value v exists in seq s"
@@ -33,9 +33,9 @@
   (map first (filter #(p (last %)) (zipmap (range) s))))
 
 (defn find-in-row
-  "returns the locations of value matching predicate p in in row i as a vector of [y x] positions"
+  "returns the locations of value matching predicate p in in row i as a vector of [x y] positions"
   [i p row]
-  (map #(vector i %) (indexes-of p row)))
+  (map #(vector % i) (indexes-of p row)))
 
 (defn find-on-board
   "returns the locations of values matching predicate p as a vector of [y x] positions"
@@ -57,6 +57,16 @@
   [state]
   (find-on-board state #(and (integer? %) (not (= (id state) %)))))
 
+(defn move-candidates []
+  [[1 0] [-1 0] [0 1] [0 -1]])
+
+(defn new-loc [board move]
+  (let [cur-loc (loc board)] [(+ (first cur-loc) (first move)) (+ (last cur-loc) (last move))]))
+
+;(defn remove-bad-paths [board candidates]
+;  (let [new-pos (zipmap candidates (map ))]
+;    (filter #() candidates)))
+
 (defn move [board]
   (println board)
-  (json/write-str {:direction {:x 0, :y 0}, :mine 0}))
+  {:direction {:x 0, :y 0}, :mine 0})
