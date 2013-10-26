@@ -56,3 +56,20 @@
       (is (= [1 2] (new-loc state [0 1])))
       (is (= [0 1] (new-loc state [-1 0])))
       (is (= [2 1] (new-loc state [1 0]))))))
+
+(deftest test-move
+  (testing "don't move off the top of the board"
+    (let [state {"yourID" 0, "board" [[0] ["e"]]}]
+      (is (= {:x  1, :y  0} (:direction (move state))))))
+
+  (testing "don't move off the bottom of the board"
+    (let [state {"yourID" 0, "board" [["e"] [0]]}]
+      (is (= {:x  -1, :y  0} (:direction (move state))))))
+
+  (testing "don't move off the left of the board"
+    (let [state {"yourID" 0, "board" [[0 "e"]]}]
+      (is (= {:x  0, :y  1} (:direction (move state))))))
+
+  (testing "don't move off the right of the board"
+    (let [state {"yourID" 0, "board" [["e" 0]]}]
+      (is (= {:x  0, :y  -1} (:direction (move state)))))))
