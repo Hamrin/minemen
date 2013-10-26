@@ -80,5 +80,5 @@
 
 (defn move [state]
   (let [candidates (remove-bad-candidates state (move-candidates))
-        best-move (first candidates)]
+        best-move (if (empty? candidates) [0 0] (first candidates))]
     {:direction {:x (first best-move), :y (last best-move)}, :bomb 0}))

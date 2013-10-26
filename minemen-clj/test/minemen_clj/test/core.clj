@@ -72,4 +72,8 @@
 
   (testing "don't move off the right of the board"
     (let [state {"yourID" 0, "board" [["e" 0]]}]
-      (is (= {:x  0, :y  -1} (:direction (move state)))))))
+      (is (= {:x  0, :y  -1} (:direction (move state))))))
+  
+  (testing "don't move anywhere if you're stuck"
+    (let [state {"yourID" 0, "board" [[0]]}]
+      (is (= {:x  0, :y  0} (:direction (move state)))))))
