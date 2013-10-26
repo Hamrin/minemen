@@ -57,15 +57,8 @@
   [state]
   (find-on-board state #(and (integer? %) (not (= (id state) %)))))
 
-(defn move-candidates []
-  [[1 0] [-1 0] [0 1] [0 -1]])
-
-(defn new-loc [board move]
-  (let [cur-loc (loc board)] [(+ (first cur-loc) (first move)) (+ (last cur-loc) (last move))]))
-
-;(defn remove-bad-paths [board candidates]
-;  (let [new-pos (zipmap candidates (map ))]
-;    (filter #() candidates)))
+(defn new-loc [state move]
+  (let [cur-loc (loc state)] [(+ (first cur-loc) (first move)) (+ (last cur-loc) (last move))]))
 
 (defn move [board]
   (println board)
