@@ -76,4 +76,12 @@
   
   (testing "don't move anywhere if you're stuck"
     (let [state {"yourID" 0, "board" [[0]]}]
+      (is (= {:x  0, :y  0} (:direction (move state))))))
+
+  (testing "don't run into bombs"
+    (let [state {"yourID" 0, "board" [["b" 0 "b"]]}]
+      (is (= {:x  0, :y  0} (:direction (move state))))))
+
+  (testing "don't run into bots"
+    (let [state {"yourID" 0, "board" [[1 0 2]]}]
       (is (= {:x  0, :y  0} (:direction (move state)))))))

@@ -60,20 +60,29 @@
 (defn new-loc [state move]
   (let [cur-loc (loc state)] [(+ (first cur-loc) (first move)) (+ (last cur-loc) (last move))]))
 
-(defn in-bounds [len i] (and (>= i 0) (< i len)))
-
-(defn in-bounds [state pos]
+(defn out-of-bounds? [state pos]
   (let [sx (first (size state))
         sy (last (size state))
         px (first pos)
         py (last pos)]
-    (and (and (>= px 0) (< px sx))
-         (and (>= py 0) (< py sy)))))
+    (or (or (< px 0) (>= px sx))
+        (or (< py 0) (>= py sy)))))
+
+(defn on-a-bomb? [state pos]
+  (seq-contains? pos (find-bombs state)))
+
+(defn on-a-bot? [state pos]
+  (seq-contains? pos (find-bots state)))
+
+(defn good-position? [state pos]
+  (and (not (out-of-bounds? state pos))
+       (not (on-a-bomb? state pos))
+       (not (on-a-bot? state pos))))
 
 (defn remove-bad-candidates [state candidates]
   (let [board-size (size state)
         moves (zipmap candidates (map #(new-loc state %) candidates))]
-    (map first (filter #(in-bounds state (last %)) moves))))
+    (map first (filter #(good-position? state (last %)) moves))))
 
 (defn move-candidates []
   [[1 0] [-1 0] [0 1] [0 -1]])
