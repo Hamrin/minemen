@@ -1,5 +1,4 @@
-(ns minemen-clj.core
-  (:require [clojure.data.json :as json]))
+(ns minemen-clj.core)
 
 (defn id
   "returns the ID of this bot"
@@ -14,13 +13,14 @@
 (defn loc
   "returns this bot's location on the board as [x y]"
   [state]
-  (first (filter #(> (last %) -1) (map #(vector (first %) (.indexOf (last %) (id state))) (indexed-board state)))))
+  (let [pos ((-> (filter #(= (id state) (% "id")) (state "bots")) first) "position")]
+    [(pos "x") (pos "y")]))
 
 (defn size
   "returns size of board as [x y]"
   [state]
-  (let [board (state "board")]
-    [(count board) (count (first board))]))
+  (let [s ((state "settings") "boardSize")]
+    [(s "x") (s "y")]))
 
 (defn seq-contains?
   "tests if value v exists in seq s"
@@ -85,7 +85,7 @@
     (map first (filter #(good-position? state (last %)) moves))))
 
 (defn move-candidates []
-  [[1 0] [-1 0] [0 1] [0 -1]])
+  (shuffle [[1 0] [-1 0] [0 1] [0 -1]]))
 
 (defn move [state]
   (let [candidates (remove-bad-candidates state (move-candidates))

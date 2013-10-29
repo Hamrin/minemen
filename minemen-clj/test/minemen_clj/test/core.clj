@@ -5,16 +5,10 @@
 
 (deftest test-board
   (testing "location"
-    (is (= [0 0] (loc {"board" [[ 0  "e"] ["e" "e"]], "yourID" 0})))
-    (is (= [0 1] (loc {"board" [["e"  0 ] ["e" "e"]], "yourID" 0})))
-    (is (= [1 0] (loc {"board" [["e" "e"] [ 0  "e"]], "yourID" 0})))
-    (is (= [1 1] (loc {"board" [["e" "e"] ["e"  0 ]], "yourID" 0}))))
+    (is (= [10 1] (loc {"bots" [{"id" 0, "position" {"x" 10, "y" 1}}], "yourID" 0}))))
 
   (testing "size of board"
-    (is (= [0 0] (size {"board" []})))
-    (is (= [1 1] (size {"board" [["e"]]})))
-    (is (= [1 2] (size {"board" [["e" "e"]]})))
-    (is (= [2 1] (size {"board" [["e"] ["e"]]}))))
+    (is (= [15 20] (size {"settings" {"boardSize" {"x" 15, "y" 20}}}))))
 
   (testing "find gold"
     (let [gold (find-gold {"yourID" 0
@@ -49,6 +43,7 @@
 
   (testing "new location"
     (let [state {"yourID" 0
+                 "bots" [{"id" 0, "position" {"x" 1, "y" 1}}]
                  "board" [["e" "e" "e"]
                           ["e"  0  "e"]
                           ["e" "e" "e"]]}]
@@ -59,29 +54,50 @@
 
 (deftest test-move
   (testing "don't move off the top of the board"
-    (let [state {"yourID" 0, "board" [[0] ["e"]]}]
-      (is (= {:x  1, :y  0} (:direction (move state))))))
+    (let [state {"yourID" 0
+                 "bots" [{"id" 0, "position" {"x" 0, "y" 0}}]
+                 "settings" {"boardSize" {"x" 2, "y" 1}}
+                 "board" [[0] ["e"]]}]
+      (is (= {:x 1, :y 0} (:direction (move state))))))
 
   (testing "don't move off the bottom of the board"
-    (let [state {"yourID" 0, "board" [["e"] [0]]}]
-      (is (= {:x  -1, :y  0} (:direction (move state))))))
+    (let [state {"yourID" 0
+                 "bots" [{"id" 0, "position" {"x" 1, "y" 0}}]
+                 "settings" {"boardSize" {"x" 2, "y" 1}}
+                 "board" [["e"] [0]]}]
+      (is (= {:x -1, :y 0} (:direction (move state))))))
 
   (testing "don't move off the left of the board"
-    (let [state {"yourID" 0, "board" [[0 "e"]]}]
-      (is (= {:x  0, :y  1} (:direction (move state))))))
+    (let [state {"yourID" 0
+                 "bots" [{"id" 0, "position" {"x" 0, "y" 0}}]
+                 "settings" {"boardSize" {"x" 1, "y" 2}}
+                 "board" [[0 "e"]]}]
+      (is (= {:x 0, :y 1} (:direction (move state))))))
 
   (testing "don't move off the right of the board"
-    (let [state {"yourID" 0, "board" [["e" 0]]}]
-      (is (= {:x  0, :y  -1} (:direction (move state))))))
-  
+    (let [state {"yourID" 0
+                 "bots" [{"id" 0, "position" {"x" 0, "y" 1}}]
+                 "settings" {"boardSize" {"x" 1, "y" 2}}
+                 "board" [["e" 0]]}]
+      (is (= {:x 0, :y -1} (:direction (move state))))))
+
   (testing "don't move anywhere if you're stuck"
-    (let [state {"yourID" 0, "board" [[0]]}]
-      (is (= {:x  0, :y  0} (:direction (move state))))))
+    (let [state {"yourID" 0
+                 "bots" [{"id" 0, "position" {"x" 0, "y" 0}}]
+                 "settings" {"boardSize" {"x" 1, "y" 1}}
+                 "board" [[0]]}]
+      (is (= {:x 0, :y 0} (:direction (move state))))))
 
   (testing "don't run into bombs"
-    (let [state {"yourID" 0, "board" [["b" 0 "b"]]}]
-      (is (= {:x  0, :y  0} (:direction (move state))))))
+    (let [state {"yourID" 0
+                 "bots" [{"id" 0, "position" {"x" 0, "y" 1}}]
+                 "settings" {"boardSize" {"x" 1, "y" 3}}
+                 "board" [["b" 0 "b"]]}]
+      (is (= {:x 0, :y 0} (:direction (move state))))))
 
   (testing "don't run into bots"
-    (let [state {"yourID" 0, "board" [[1 0 2]]}]
-      (is (= {:x  0, :y  0} (:direction (move state)))))))
+    (let [state {"yourID" 0
+                 "bots" [{"id" 0, "position" {"x" 0, "y" 1}}]
+                 "settings" {"boardSize" {"x" 1, "y" 3}}
+                 "board" [[1 0 2]]}]
+      (is (= {:x 0, :y 0} (:direction (move state)))))))

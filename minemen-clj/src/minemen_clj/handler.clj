@@ -15,7 +15,7 @@
 
 (defroutes app-routes
   (POST "/start" [_ :as req] (start req))
-  (POST "/move" {board :body} (println "move") (move (slurp board)))
+  (POST "/move" {board :body} (let [state (slurp board)] (json/write-str (move (json/read-str state)))))
   (route/resources "/")
   (route/not-found "Not Found"))
 
